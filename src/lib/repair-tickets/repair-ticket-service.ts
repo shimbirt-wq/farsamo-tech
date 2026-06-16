@@ -2,6 +2,7 @@ import { RepairStatus } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import type { PublicUser } from "@/lib/auth/public-user";
 import type { CreateRepairTicketInput } from "@/lib/validations/repair-ticket";
+import type { RepairTicketListQuery } from "@/lib/validations/repair-ticket-filters";
 
 export type PublicRepairTicket = {
   id: string;
@@ -20,6 +21,39 @@ export type PublicRepairTicket = {
     brand: string;
     model: string;
     serialNumber: string | null;
+  };
+};
+
+export type RepairTicketDetail = PublicRepairTicket & {
+  logs: Array<{
+    id: string;
+    status: RepairStatus;
+    diagnosis: string | null;
+    repairNotes: string | null;
+    createdAt: Date;
+    technician: {
+      id: string;
+      fullName: string;
+      email: string;
+    } | null;
+  }>;
+  device: PublicRepairTicket["device"] & {
+    owner: {
+      id: string;
+      fullName: string;
+      email: string;
+      universityId: string | null;
+    };
+  };
+};
+
+export type RepairTicketListResult = {
+  tickets: PublicRepairTicket[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
   };
 };
 
@@ -45,6 +79,45 @@ const publicRepairTicketSelect = {
   },
 } as const;
 
+const repairTicketDetailSelect = {
+  ...publicRepairTicketSelect,
+  device: {
+    select: {
+      id: true,
+      ownerId: true,
+      deviceType: true,
+      brand: true,
+      model: true,
+      serialNumber: true,
+      owner: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          universityId: true,
+        },
+      },
+    },
+  },
+  logs: {
+    select: {
+      id: true,
+      status: true,
+      diagnosis: true,
+      repairNotes: true,
+      createdAt: true,
+      technician: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }],
+  },
+};
+
 function toPublicRepairTicket(
   ticket: {
     id: string;
@@ -67,6 +140,69 @@ function toPublicRepairTicket(
   },
 ): PublicRepairTicket {
   return ticket;
+}
+
+function toRepairTicketDetail(
+  ticket: {
+    id: string;
+    ticketId: string;
+    deviceId: string;
+    technicianId: string | null;
+    issueDescription: string;
+    photoUrl: string | null;
+    status: RepairStatus;
+    createdAt: Date;
+    updatedAt: Date;
+    device: {
+      id: string;
+      ownerId: string;
+      deviceType: string;
+      brand: string;
+      model: string;
+      serialNumber: string | null;
+      owner: {
+        id: string;
+        fullName: string;
+        email: string;
+        universityId: string | null;
+      };
+    };
+    logs: Array<{
+      id: string;
+      status: RepairStatus;
+      diagnosis: string | null;
+      repairNotes: string | null;
+      createdAt: Date;
+      technician: {
+        id: string;
+        fullName: string;
+        email: string;
+      } | null;
+    }>;
+  },
+): RepairTicketDetail {
+  return ticket;
+}
+
+function buildDateRangeFilter(input: RepairTicketListQuery) {
+  if (!input.dateFrom && !input.dateTo) {
+    return {};
+  }
+
+  return {
+    createdAt: {
+      ...(input.dateFrom ? { gte: new Date(`${input.dateFrom}T00:00:00.000Z`) } : {}),
+      ...(input.dateTo ? { lte: new Date(`${input.dateTo}T23:59:59.999Z`) } : {}),
+    },
+  };
+}
+
+function buildTicketFilter(input: RepairTicketListQuery) {
+  return {
+    ...(input.status ? { status: input.status } : {}),
+    ...(input.ticketId ? { ticketId: { contains: input.ticketId, mode: "insensitive" as const } } : {}),
+    ...buildDateRangeFilter(input),
+  };
 }
 
 function generateTicketId() {
@@ -185,4 +321,108 @@ export async function listOwnedRepairTickets(prisma: PrismaClient, user: PublicU
   });
 
   return tickets.map(toPublicRepairTicket);
+}
+
+export async function listRepairTickets(
+  prisma: PrismaClient,
+  user: PublicUser,
+  input: RepairTicketListQuery,
+): Promise<RepairTicketListResult> {
+  const baseFilter = buildTicketFilter(input);
+  const skip = (input.page - 1) * input.pageSize;
+
+  const where =
+    user.role === "ADMIN"
+      ? baseFilter
+      : user.role === "TECHNICIAN"
+        ? {
+            ...baseFilter,
+            technicianId: user.id,
+          }
+        : {
+            ...baseFilter,
+            device: {
+              ownerId: user.id,
+            },
+          };
+
+  const [tickets, totalItems] = await Promise.all([
+    prisma.repairTicket.findMany({
+      where,
+      select: publicRepairTicketSelect,
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      skip,
+      take: input.pageSize,
+    }),
+    prisma.repairTicket.count({ where }),
+  ]);
+
+  return {
+    tickets: tickets.map(toPublicRepairTicket),
+    pagination: {
+      page: input.page,
+      pageSize: input.pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / input.pageSize)),
+    },
+  };
+}
+
+export async function getRepairTicketDetail(
+  prisma: PrismaClient,
+  user: PublicUser,
+  ticketId: string,
+): Promise<
+  | {
+      ok: true;
+      ticket: RepairTicketDetail;
+    }
+  | {
+      ok: false;
+      status: 403 | 404;
+      message: string;
+    }
+> {
+  const ticket = await prisma.repairTicket.findUnique({
+    where: { id: ticketId },
+    select: repairTicketDetailSelect,
+  });
+
+  if (!ticket) {
+    return {
+      ok: false,
+      status: 404,
+      message: "Repair ticket not found.",
+    };
+  }
+
+  const ownerId = ticket.device.ownerId;
+  const assignedTechnicianId = ticket.technicianId;
+
+  if (user.role === "ADMIN") {
+    return {
+      ok: true,
+      ticket: toRepairTicketDetail(ticket),
+    };
+  }
+
+  if ((user.role === "STUDENT" || user.role === "LECTURER") && ownerId === user.id) {
+    return {
+      ok: true,
+      ticket: toRepairTicketDetail(ticket),
+    };
+  }
+
+  if (user.role === "TECHNICIAN" && assignedTechnicianId === user.id) {
+    return {
+      ok: true,
+      ticket: toRepairTicketDetail(ticket),
+    };
+  }
+
+  return {
+    ok: false,
+    status: 403,
+    message: "You do not have permission to access this repair ticket.",
+  };
 }
