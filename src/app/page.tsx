@@ -40,6 +40,12 @@ export default function HomePage() {
                 Devices
               </Link>
               <Link
+                href="/repair-tickets"
+                className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+              >
+                Repair tickets
+              </Link>
+              <Link
                 href="/api/health"
                 className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
               >

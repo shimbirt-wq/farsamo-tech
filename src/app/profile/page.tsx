@@ -74,6 +74,14 @@ export default async function ProfilePage() {
             >
               My devices
             </Link>
+            {(user.role === "STUDENT" || user.role === "LECTURER") ? (
+              <Link
+                href="/repair-tickets"
+                className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+              >
+                Repair tickets
+              </Link>
+            ) : null}
             {user.role === "ADMIN" ? (
               <Link
                 href="/admin/users"
