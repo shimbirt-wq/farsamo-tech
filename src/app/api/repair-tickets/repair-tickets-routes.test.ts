@@ -440,6 +440,15 @@ describe("repair ticket route handlers", () => {
     );
     expect(mockPrisma.repairLog.create).toHaveBeenCalledTimes(1);
     expect(mockPrisma.notification.create).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.notification.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: "tech_123",
+          title: "New repair ticket assignment",
+          message: "You have been assigned ticket TCK-20260101-ABC123.",
+        }),
+      }),
+    );
     expect(body.ticket.technician.id).toBe("tech_123");
     vi.unstubAllEnvs();
   });
@@ -604,6 +613,15 @@ describe("repair ticket route handlers", () => {
     );
     expect(mockPrisma.repairLog.create).toHaveBeenCalledTimes(1);
     expect(mockPrisma.notification.create).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.notification.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: "user_123",
+          title: "Repair ticket status updated",
+          message: "Ticket TCK-20260101-ABC123 moved to Device Received.",
+        }),
+      }),
+    );
     expect(body.ticket.status).toBe("DEVICE_RECEIVED");
     vi.unstubAllEnvs();
   });
