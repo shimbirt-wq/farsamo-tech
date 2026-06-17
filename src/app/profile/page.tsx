@@ -88,6 +88,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
+              href="/dashboard"
+              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+            >
+              Open dashboard
+            </Link>
+            <Link
               href="/devices"
               className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
             >
