@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRepairTicketSchema } from "./repair-ticket";
+import { assignRepairTicketSchema, createRepairTicketSchema } from "./repair-ticket";
 
 describe("createRepairTicketSchema", () => {
   it("accepts valid ticket input without a photo", () => {
@@ -65,6 +65,24 @@ describe("createRepairTicketSchema", () => {
       deviceId: "device_123",
       issueDescription: "Laptop screen flickers after startup.",
       photoUrl: "not-a-url",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("assignRepairTicketSchema", () => {
+  it("accepts a technician id", () => {
+    const result = assignRepairTicketSchema.safeParse({
+      technicianId: "tech_123",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an empty technician id", () => {
+    const result = assignRepairTicketSchema.safeParse({
+      technicianId: "",
     });
 
     expect(result.success).toBe(false);

@@ -4,7 +4,11 @@ import { signSessionToken } from "@/lib/auth/session";
 
 const mockPrisma = vi.hoisted(() => ({
   user: {
+    findMany: vi.fn(),
     findUnique: vi.fn(),
+  },
+  notification: {
+    create: vi.fn(),
   },
   device: {
     findUnique: vi.fn(),
@@ -14,6 +18,7 @@ const mockPrisma = vi.hoisted(() => ({
     create: vi.fn(),
     findMany: vi.fn(),
     findUnique: vi.fn(),
+    update: vi.fn(),
   },
   repairLog: {
     create: vi.fn(),
@@ -338,6 +343,167 @@ describe("repair ticket route handlers", () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toBe("Invalid repair ticket list query.");
+    vi.unstubAllEnvs();
+  });
+
+  it("allows admins to assign tickets to technicians and creates audit records", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "admin_123", role: "ADMIN" });
+    mockPrisma.user.findUnique
+      .mockResolvedValueOnce(buildUser({ id: "admin_123", role: "ADMIN" }))
+      .mockResolvedValueOnce({ id: "tech_123", fullName: "Tech User", role: "TECHNICIAN" });
+    mockPrisma.repairTicket.findUnique
+      .mockResolvedValueOnce({ id: "ticket_123", ticketId: "TCK-20260101-ABC123" })
+      .mockResolvedValueOnce({
+        ...buildRepairTicketDetail({ id: "ticket_123", technicianId: "tech_123" }),
+        technician: {
+          id: "tech_123",
+          fullName: "Tech User",
+          email: "tech@example.invalid",
+        },
+      });
+    mockPrisma.repairTicket.update.mockResolvedValue(buildRepairTicket({ id: "ticket_123", technicianId: "tech_123" }));
+    mockPrisma.repairLog.create.mockResolvedValue(buildRepairLog({ technicianId: null }));
+    mockPrisma.notification.create.mockResolvedValue({
+      id: "notification_123",
+    });
+    mockPrisma.$transaction.mockImplementation(async (callback: (tx: typeof mockPrisma) => unknown) => callback(mockPrisma));
+    const { PATCH } = await import("./[ticketId]/assign/route");
+
+    const response = await PATCH(
+      buildRequest("/api/repair-tickets/ticket_123/assign", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          technicianId: "tech_123",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.repairTicket.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "ticket_123" },
+        data: { technicianId: "tech_123" },
+      }),
+    );
+    expect(mockPrisma.repairLog.create).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.notification.create).toHaveBeenCalledTimes(1);
+    expect(body.ticket.technician.id).toBe("tech_123");
+    vi.unstubAllEnvs();
+  });
+
+  it("blocks non-admin users from assigning technicians", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "user_123", role: "STUDENT" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "user_123", role: "STUDENT" }));
+    const { PATCH } = await import("./[ticketId]/assign/route");
+
+    const response = await PATCH(
+      buildRequest("/api/repair-tickets/ticket_123/assign", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          technicianId: "tech_123",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body.error).toBe("You do not have permission to access this resource.");
+    vi.unstubAllEnvs();
+  });
+
+  it("rejects assigning a non-technician user", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "admin_123", role: "ADMIN" });
+    mockPrisma.user.findUnique
+      .mockResolvedValueOnce(buildUser({ id: "admin_123", role: "ADMIN" }))
+      .mockResolvedValueOnce({ id: "student_123", fullName: "Student User", role: "STUDENT" });
+    mockPrisma.repairTicket.findUnique.mockResolvedValue({ id: "ticket_123", ticketId: "TCK-20260101-ABC123" });
+    const { PATCH } = await import("./[ticketId]/assign/route");
+
+    const response = await PATCH(
+      buildRequest("/api/repair-tickets/ticket_123/assign", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          technicianId: "student_123",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(409);
+    expect(body.error).toBe("Only users with technician role can be assigned repair tickets.");
+    vi.unstubAllEnvs();
+  });
+
+  it("rejects assignment for a missing ticket", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "admin_123", role: "ADMIN" });
+    mockPrisma.user.findUnique
+      .mockResolvedValueOnce(buildUser({ id: "admin_123", role: "ADMIN" }))
+      .mockResolvedValueOnce({ id: "tech_123", fullName: "Tech User", role: "TECHNICIAN" });
+    mockPrisma.repairTicket.findUnique.mockResolvedValue(null);
+    const { PATCH } = await import("./[ticketId]/assign/route");
+
+    const response = await PATCH(
+      buildRequest("/api/repair-tickets/missing_ticket/assign", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          technicianId: "tech_123",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "missing_ticket" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error).toBe("Repair ticket not found.");
+    vi.unstubAllEnvs();
+  });
+
+  it("shows a newly assigned ticket in the technician-scoped list", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "tech_123", role: "TECHNICIAN" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "tech_123", role: "TECHNICIAN" }));
+    mockPrisma.repairTicket.findMany.mockResolvedValue([
+      buildRepairTicketWithDevice({ id: "ticket_123", technicianId: "tech_123" }),
+    ]);
+    mockPrisma.repairTicket.count.mockResolvedValue(1);
+    const { GET } = await import("./route");
+
+    const response = await GET(
+      buildRequest("/api/repair-tickets?page=1&pageSize=10", {
+        headers: {
+          cookie: `farsamotech_session=${token}`,
+        },
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.tickets).toHaveLength(1);
+    expect(body.tickets[0].technicianId).toBe("tech_123");
     vi.unstubAllEnvs();
   });
 

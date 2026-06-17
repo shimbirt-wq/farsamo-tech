@@ -1,7 +1,7 @@
 import { RepairStatus } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import type { PublicUser } from "@/lib/auth/public-user";
-import type { CreateRepairTicketInput } from "@/lib/validations/repair-ticket";
+import type { AssignRepairTicketInput, CreateRepairTicketInput } from "@/lib/validations/repair-ticket";
 import type { RepairTicketListQuery } from "@/lib/validations/repair-ticket-filters";
 
 export type PublicRepairTicket = {
@@ -25,6 +25,11 @@ export type PublicRepairTicket = {
 };
 
 export type RepairTicketDetail = PublicRepairTicket & {
+  technician: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
   logs: Array<{
     id: string;
     status: RepairStatus;
@@ -81,6 +86,13 @@ const publicRepairTicketSelect = {
 
 const repairTicketDetailSelect = {
   ...publicRepairTicketSelect,
+  technician: {
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+    },
+  },
   device: {
     select: {
       id: true,
@@ -153,6 +165,11 @@ function toRepairTicketDetail(
     status: RepairStatus;
     createdAt: Date;
     updatedAt: Date;
+    technician: {
+      id: string;
+      fullName: string;
+      email: string;
+    } | null;
     device: {
       id: string;
       ownerId: string;
@@ -424,5 +441,121 @@ export async function getRepairTicketDetail(
     ok: false,
     status: 403,
     message: "You do not have permission to access this repair ticket.",
+  };
+}
+
+export async function assignTechnicianToRepairTicket(
+  prisma: PrismaClient,
+  user: PublicUser,
+  ticketId: string,
+  input: AssignRepairTicketInput,
+): Promise<
+  | {
+      ok: true;
+      ticket: RepairTicketDetail;
+    }
+  | {
+      ok: false;
+      status: 403 | 404 | 409;
+      message: string;
+    }
+> {
+  if (user.role !== "ADMIN") {
+    return {
+      ok: false,
+      status: 403,
+      message: "Only admins can assign technicians to repair tickets.",
+    };
+  }
+
+  const [ticket, technician] = await Promise.all([
+    prisma.repairTicket.findUnique({
+      where: { id: ticketId },
+      select: {
+        id: true,
+        ticketId: true,
+        status: true,
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: input.technicianId },
+      select: {
+        id: true,
+        fullName: true,
+        role: true,
+      },
+    }),
+  ]);
+
+  if (!ticket) {
+    return {
+      ok: false,
+      status: 404,
+      message: "Repair ticket not found.",
+    };
+  }
+
+  if (!technician) {
+    return {
+      ok: false,
+      status: 404,
+      message: "Technician not found.",
+    };
+  }
+
+  if (technician.role !== "TECHNICIAN") {
+    return {
+      ok: false,
+      status: 409,
+      message: "Only users with technician role can be assigned repair tickets.",
+    };
+  }
+
+  const updatedTicket = await prisma.$transaction(async (tx) => {
+    await tx.repairTicket.update({
+      where: { id: ticketId },
+      data: {
+        technicianId: technician.id,
+      },
+    });
+
+    await tx.repairLog.create({
+      data: {
+        ticketId: ticket.id,
+        technicianId: null,
+        status: ticket.status,
+        diagnosis: null,
+        repairNotes: `Ticket assigned to technician ${technician.fullName}.`,
+      },
+    });
+
+    await tx.notification.create({
+      data: {
+        userId: technician.id,
+        ticketId: ticket.id,
+        channel: "DASHBOARD",
+        status: "PENDING",
+        title: "New repair ticket assignment",
+        message: `You have been assigned ticket ${ticket.ticketId}.`,
+      },
+    });
+
+    return tx.repairTicket.findUnique({
+      where: { id: ticketId },
+      select: repairTicketDetailSelect,
+    });
+  });
+
+  if (!updatedTicket) {
+    return {
+      ok: false,
+      status: 404,
+      message: "Repair ticket not found.",
+    };
+  }
+
+  return {
+    ok: true,
+    ticket: toRepairTicketDetail(updatedTicket),
   };
 }

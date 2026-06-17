@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
+import { TechnicianAssignmentForm } from "@/app/repair-tickets/technician-assignment-form";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
 import { getRepairTicketDetail } from "@/lib/repair-tickets/repair-ticket-service";
+import { listAssignableTechnicians } from "@/lib/users/user-service";
 
 type RepairTicketDetailPageProps = {
   params: Promise<{
@@ -20,7 +22,10 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
   }
 
   const { ticketId } = await params;
-  const result = await getRepairTicketDetail(prisma, user, ticketId);
+  const [result, technicians] = await Promise.all([
+    getRepairTicketDetail(prisma, user, ticketId),
+    user.role === "ADMIN" ? listAssignableTechnicians(prisma) : Promise.resolve([]),
+  ]);
 
   if (!result.ok) {
     if (result.status === 404) {
@@ -65,10 +70,28 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.device.owner.fullName}</p>
           </article>
           <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Assigned technician</p>
+            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.technician?.fullName ?? "Not assigned"}</p>
+          </article>
+          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Photo URL</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.photoUrl ?? "Not provided"}</p>
           </article>
         </div>
+
+        {user.role === "ADMIN" ? (
+          <div className="mt-8">
+            <TechnicianAssignmentForm
+              currentTechnicianId={ticket.technicianId}
+              technicians={technicians.map((technician) => ({
+                id: technician.id,
+                fullName: technician.fullName,
+                email: technician.email,
+              }))}
+              ticketId={ticket.id}
+            />
+          </div>
+        ) : null}
 
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-[var(--foreground)]">Timeline</h2>

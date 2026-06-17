@@ -15,4 +15,9 @@ export const createRepairTicketSchema = z.object({
     .transform((value) => value || undefined),
 });
 
+export const assignRepairTicketSchema = z.object({
+  technicianId: z.string().min(1, "Technician is required"),
+});
+
 export type CreateRepairTicketInput = z.infer<typeof createRepairTicketSchema>;
+export type AssignRepairTicketInput = z.infer<typeof assignRepairTicketSchema>;
