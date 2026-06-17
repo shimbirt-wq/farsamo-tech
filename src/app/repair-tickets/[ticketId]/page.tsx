@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getNextRepairStatus, REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
+import { RepairLogForm } from "@/app/repair-tickets/repair-log-form";
 import { TechnicianAssignmentForm } from "@/app/repair-tickets/technician-assignment-form";
 import { StatusUpdateForm } from "@/app/repair-tickets/status-update-form";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
@@ -39,6 +40,7 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
   const { ticket } = result;
   const nextStatus = getNextRepairStatus(ticket.status);
   const canUpdateStatus = user.role === "ADMIN" || (user.role === "TECHNICIAN" && ticket.technicianId === user.id);
+  const canAddRepairLog = canUpdateStatus;
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-14">
@@ -107,6 +109,12 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
           </div>
         ) : null}
 
+        {canAddRepairLog ? (
+          <div className="mt-8">
+            <RepairLogForm ticketId={ticket.id} />
+          </div>
+        ) : null}
+
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-[var(--foreground)]">Timeline</h2>
           <div className="mt-4 grid gap-4">
@@ -116,6 +124,9 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
                   <p className="text-sm font-semibold text-[var(--foreground)]">{REPAIR_STATUS_LABELS[log.status]}</p>
                   <p className="text-sm text-[var(--muted)]">{new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(log.createdAt)}</p>
                 </div>
+                {log.technician ? (
+                  <p className="mt-2 text-sm text-[var(--muted)]">Technician: {log.technician.fullName}</p>
+                ) : null}
                 <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{log.repairNotes ?? "No repair note recorded."}</p>
                 {log.diagnosis ? <p className="mt-2 text-sm leading-7 text-[var(--muted)]">Diagnosis: {log.diagnosis}</p> : null}
               </article>

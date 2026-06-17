@@ -2,7 +2,12 @@ import { RepairStatus } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import type { PublicUser } from "@/lib/auth/public-user";
 import { canTransitionRepairStatus, REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
-import type { AssignRepairTicketInput, CreateRepairTicketInput, UpdateRepairTicketStatusInput } from "@/lib/validations/repair-ticket";
+import type {
+  AssignRepairTicketInput,
+  CreateRepairTicketInput,
+  CreateRepairTicketLogInput,
+  UpdateRepairTicketStatusInput,
+} from "@/lib/validations/repair-ticket";
 import type { RepairTicketListQuery } from "@/lib/validations/repair-ticket-filters";
 
 export type PublicRepairTicket = {
@@ -666,4 +671,61 @@ export async function updateRepairTicketStatus(
     ok: true,
     ticket: toRepairTicketDetail(updatedTicket),
   };
+}
+
+export async function addRepairTicketLog(
+  prisma: PrismaClient,
+  user: PublicUser,
+  ticketId: string,
+  input: CreateRepairTicketLogInput,
+): Promise<
+  | {
+      ok: true;
+      ticket: RepairTicketDetail;
+    }
+  | {
+      ok: false;
+      status: 403 | 404;
+      message: string;
+    }
+> {
+  const ticket = await prisma.repairTicket.findUnique({
+    where: { id: ticketId },
+    select: {
+      id: true,
+      status: true,
+      technicianId: true,
+    },
+  });
+
+  if (!ticket) {
+    return {
+      ok: false,
+      status: 404,
+      message: "Repair ticket not found.",
+    };
+  }
+
+  const isAdmin = user.role === "ADMIN";
+  const isAssignedTechnician = user.role === "TECHNICIAN" && ticket.technicianId === user.id;
+
+  if (!isAdmin && !isAssignedTechnician) {
+    return {
+      ok: false,
+      status: 403,
+      message: "Only the assigned technician or an admin can add repair logs.",
+    };
+  }
+
+  await prisma.repairLog.create({
+    data: {
+      ticketId: ticket.id,
+      technicianId: user.id,
+      status: ticket.status,
+      diagnosis: input.diagnosis ?? null,
+      repairNotes: input.repairNotes ?? null,
+    },
+  });
+
+  return getRepairTicketDetail(prisma, user, ticketId);
 }

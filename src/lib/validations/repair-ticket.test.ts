@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { assignRepairTicketSchema, createRepairTicketSchema, updateRepairTicketStatusSchema } from "./repair-ticket";
+import {
+  assignRepairTicketSchema,
+  createRepairTicketLogSchema,
+  createRepairTicketSchema,
+  updateRepairTicketStatusSchema,
+} from "./repair-ticket";
 
 describe("createRepairTicketSchema", () => {
   it("accepts valid ticket input without a photo", () => {
@@ -101,6 +106,41 @@ describe("updateRepairTicketStatusSchema", () => {
   it("rejects an invalid repair status", () => {
     const result = updateRepairTicketStatusSchema.safeParse({
       status: "NOT_A_STATUS",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("createRepairTicketLogSchema", () => {
+  it("accepts a diagnosis-only log", () => {
+    const result = createRepairTicketLogSchema.safeParse({
+      diagnosis: "Battery health is degraded and needs replacement.",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a repair-notes-only log", () => {
+    const result = createRepairTicketLogSchema.safeParse({
+      repairNotes: "Replaced keyboard ribbon cable and tested input.",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects logs without diagnosis and repair notes", () => {
+    const result = createRepairTicketLogSchema.safeParse({
+      diagnosis: "   ",
+      repairNotes: "   ",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects notes that exceed the maximum length", () => {
+    const result = createRepairTicketLogSchema.safeParse({
+      repairNotes: "a".repeat(2001),
     });
 
     expect(result.success).toBe(false);

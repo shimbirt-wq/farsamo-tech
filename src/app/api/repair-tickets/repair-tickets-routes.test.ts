@@ -119,6 +119,29 @@ function buildRepairTicketDetail(overrides: Partial<RepairTicket> = {}) {
   };
 }
 
+function buildRepairTicketDetailWithLogs(
+  logs: Array<{
+    id: string;
+    status: RepairTicket["status"];
+    diagnosis: string | null;
+    repairNotes: string | null;
+    createdAt: Date;
+    technician: {
+      id: string;
+      fullName: string;
+      email: string;
+    } | null;
+  }>,
+  overrides: Partial<RepairTicket> = {},
+) {
+  const ticket = buildRepairTicketDetail(overrides);
+
+  return {
+    ...ticket,
+    logs,
+  };
+}
+
 function buildRepairLog(overrides: Partial<RepairLog> = {}) {
   return {
     id: "log_123",
@@ -709,6 +732,208 @@ describe("repair ticket route handlers", () => {
 
     expect(response.status).toBe(403);
     expect(body.error).toBe("You do not have permission to access this repair ticket.");
+    vi.unstubAllEnvs();
+  });
+
+  it("allows the assigned technician to add a repair log", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "tech_123", role: "TECHNICIAN" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "tech_123", role: "TECHNICIAN" }));
+    mockPrisma.repairTicket.findUnique
+      .mockResolvedValueOnce({
+        id: "ticket_123",
+        status: "DEVICE_RECEIVED",
+        technicianId: "tech_123",
+      })
+      .mockResolvedValueOnce(
+        buildRepairTicketDetail({
+          id: "ticket_123",
+          status: "DEVICE_RECEIVED",
+          technicianId: "tech_123",
+        }),
+      );
+    mockPrisma.repairLog.create.mockResolvedValue(
+      buildRepairLog({
+        ticketId: "ticket_123",
+        technicianId: "tech_123",
+        status: "DEVICE_RECEIVED",
+        diagnosis: "Power rail issue isolated to charging circuit.",
+        repairNotes: "Replaced charging IC and confirmed stable boot.",
+      }),
+    );
+    const { POST } = await import("./[ticketId]/logs/route");
+
+    const response = await POST(
+      buildRequest("/api/repair-tickets/ticket_123/logs", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          diagnosis: "Power rail issue isolated to charging circuit.",
+          repairNotes: "Replaced charging IC and confirmed stable boot.",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(mockPrisma.repairLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          ticketId: "ticket_123",
+          technicianId: "tech_123",
+          status: "DEVICE_RECEIVED",
+          diagnosis: "Power rail issue isolated to charging circuit.",
+        }),
+      }),
+    );
+    expect(body.ticket.logs).toHaveLength(1);
+    vi.unstubAllEnvs();
+  });
+
+  it("blocks unassigned technicians from adding repair logs", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "tech_other", role: "TECHNICIAN" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "tech_other", role: "TECHNICIAN" }));
+    mockPrisma.repairTicket.findUnique.mockResolvedValue({
+      id: "ticket_123",
+      status: "DEVICE_RECEIVED",
+      technicianId: "tech_123",
+    });
+    const { POST } = await import("./[ticketId]/logs/route");
+
+    const response = await POST(
+      buildRequest("/api/repair-tickets/ticket_123/logs", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          repairNotes: "Attempted note on unassigned ticket.",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body.error).toBe("Only the assigned technician or an admin can add repair logs.");
+    vi.unstubAllEnvs();
+  });
+
+  it("blocks students from adding repair logs", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "user_123", role: "STUDENT" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "user_123", role: "STUDENT" }));
+    mockPrisma.repairTicket.findUnique.mockResolvedValue({
+      id: "ticket_123",
+      status: "DEVICE_RECEIVED",
+      technicianId: "tech_123",
+    });
+    const { POST } = await import("./[ticketId]/logs/route");
+
+    const response = await POST(
+      buildRequest("/api/repair-tickets/ticket_123/logs", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          repairNotes: "Student note attempt.",
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body.error).toBe("Only the assigned technician or an admin can add repair logs.");
+    vi.unstubAllEnvs();
+  });
+
+  it("rejects invalid repair log data", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "tech_123", role: "TECHNICIAN" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "tech_123", role: "TECHNICIAN" }));
+    const { POST } = await import("./[ticketId]/logs/route");
+
+    const response = await POST(
+      buildRequest("/api/repair-tickets/ticket_123/logs", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: `farsamotech_session=${token}`,
+        },
+        body: JSON.stringify({
+          repairNotes: "a".repeat(2001),
+        }),
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("Invalid repair log data.");
+    vi.unstubAllEnvs();
+  });
+
+  it("returns the ticket timeline in ascending chronological order", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const token = await signSessionToken({ id: "admin_123", role: "ADMIN" });
+    mockPrisma.user.findUnique.mockResolvedValue(buildUser({ id: "admin_123", role: "ADMIN" }));
+    mockPrisma.repairTicket.findUnique.mockResolvedValue(
+      buildRepairTicketDetailWithLogs([
+        {
+          id: "log_1",
+          status: "REGISTRATION_COMPLETED",
+          diagnosis: null,
+          repairNotes: "Registered.",
+          createdAt: new Date("2026-01-01T00:00:00.000Z"),
+          technician: null,
+        },
+        {
+          id: "log_2",
+          status: "DEVICE_RECEIVED",
+          diagnosis: "Device intake completed.",
+          repairNotes: "Received and labeled.",
+          createdAt: new Date("2026-01-02T00:00:00.000Z"),
+          technician: {
+            id: "tech_123",
+            fullName: "Assigned Technician",
+            email: "tech@example.invalid",
+          },
+        },
+      ]),
+    );
+    const { GET } = await import("./[ticketId]/route");
+
+    const response = await GET(
+      buildRequest("/api/repair-tickets/ticket_123", {
+        headers: {
+          cookie: `farsamotech_session=${token}`,
+        },
+      }),
+      { params: Promise.resolve({ ticketId: "ticket_123" }) },
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.repairTicket.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          logs: expect.objectContaining({
+            orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          }),
+        }),
+      }),
+    );
+    expect(body.ticket.logs[0].id).toBe("log_1");
+    expect(body.ticket.logs[1].id).toBe("log_2");
     vi.unstubAllEnvs();
   });
 });
