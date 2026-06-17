@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { NotificationList } from "@/app/profile/notification-list";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
+import { prisma } from "@/lib/db/prisma";
+import { listCurrentUserNotifications } from "@/lib/notifications/notification-service";
+import { notificationListQuerySchema } from "@/lib/validations/notifications";
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("en", {
@@ -16,7 +20,15 @@ const profileFields = [
   { key: "phone", label: "Phone" },
 ] as const;
 
-export default async function ProfilePage() {
+type ProfilePageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function readSearchParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const user = await getCurrentServerUser();
   const deniedMessage =
     "Admin tools require an authenticated admin account. Sign in with an admin user to open search, pagination, and role management.";
@@ -50,6 +62,13 @@ export default async function ProfilePage() {
     );
   }
 
+  const params = searchParams ? await searchParams : {};
+  const notificationQuery = notificationListQuerySchema.parse({
+    page: readSearchParam(params.page),
+    pageSize: readSearchParam(params.pageSize),
+  });
+  const notificationsResult = await listCurrentUserNotifications(prisma, user, notificationQuery);
+
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-6 py-14">
       <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
@@ -68,6 +87,12 @@ export default async function ProfilePage() {
             ) : null}
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link
+              href="/dashboard"
+              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+            >
+              Open dashboard
+            </Link>
             <Link
               href="/devices"
               className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
@@ -119,6 +144,67 @@ export default async function ProfilePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Updated</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{formatDate(user.updatedAt)}</p>
           </article>
+        </div>
+
+        <div className="mt-10">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Notifications</p>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--foreground)]">Dashboard notification center</h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                You have {notificationsResult.unreadCount} unread notification{notificationsResult.unreadCount === 1 ? "" : "s"}.
+              </p>
+            </div>
+            <Link
+              href={`/api/notifications?page=${notificationsResult.pagination.page}&pageSize=${notificationsResult.pagination.pageSize}`}
+              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+            >
+              Open notifications JSON
+            </Link>
+          </div>
+
+          <div className="mt-6">
+            {notificationsResult.notifications.length > 0 ? (
+              <NotificationList
+                notifications={notificationsResult.notifications.map((notification) => ({
+                  id: notification.id,
+                  title: notification.title,
+                  message: notification.message,
+                  status: notification.status,
+                  createdAt: notification.createdAt,
+                  readAt: notification.readAt,
+                }))}
+              />
+            ) : (
+              <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+                <p className="text-sm text-[var(--muted)]">No notifications yet.</p>
+              </article>
+            )}
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--muted)]">
+            <p>
+              Page {notificationsResult.pagination.page} of {notificationsResult.pagination.totalPages} · {notificationsResult.pagination.totalItems} notifications
+            </p>
+            <div className="flex gap-3">
+              {notificationsResult.pagination.page > 1 ? (
+                <Link
+                  href={`/profile?page=${notificationsResult.pagination.page - 1}&pageSize=${notificationsResult.pagination.pageSize}`}
+                  className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+                >
+                  Previous
+                </Link>
+              ) : null}
+              {notificationsResult.pagination.page < notificationsResult.pagination.totalPages ? (
+                <Link
+                  href={`/profile?page=${notificationsResult.pagination.page + 1}&pageSize=${notificationsResult.pagination.pageSize}`}
+                  className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+                >
+                  Next
+                </Link>
+              ) : null}
+            </div>
+          </div>
         </div>
       </section>
     </main>

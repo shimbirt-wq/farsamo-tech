@@ -12,6 +12,8 @@ export type UserListResult = {
   };
 };
 
+export type AssignableTechnician = PublicUser;
+
 function buildUserSearchFilter(query?: string) {
   if (!query) {
     return {};
@@ -59,6 +61,18 @@ export async function getUserById(prisma: PrismaClient, userId: string): Promise
   });
 
   return user ? toPublicUser(user) : null;
+}
+
+export async function listAssignableTechnicians(prisma: PrismaClient): Promise<AssignableTechnician[]> {
+  const users = await prisma.user.findMany({
+    where: {
+      role: "TECHNICIAN" satisfies UserRole,
+    },
+    select: publicUserSelect,
+    orderBy: [{ fullName: "asc" }, { id: "asc" }],
+  });
+
+  return users.map(toPublicUser);
 }
 
 export async function updateUserRole(

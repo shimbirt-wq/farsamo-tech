@@ -1,11 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
-import { REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
+import { getNextRepairStatus, REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
+import { RepairLogForm } from "@/app/repair-tickets/repair-log-form";
+import { TechnicianAssignmentForm } from "@/app/repair-tickets/technician-assignment-form";
+import { StatusUpdateForm } from "@/app/repair-tickets/status-update-form";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
 import { buildTicketQrCodeUrl, buildTicketLookupUrl } from "@/lib/lookup/ticket-lookup-service";
 import { getRepairTicketDetail } from "@/lib/repair-tickets/repair-ticket-service";
+import { listAssignableTechnicians } from "@/lib/users/user-service";
 
 type RepairTicketDetailPageProps = {
   params: Promise<{
@@ -22,7 +26,10 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
   }
 
   const { ticketId } = await params;
-  const result = await getRepairTicketDetail(prisma, user, ticketId);
+  const [result, technicians] = await Promise.all([
+    getRepairTicketDetail(prisma, user, ticketId),
+    user.role === "ADMIN" ? listAssignableTechnicians(prisma) : Promise.resolve([]),
+  ]);
 
   if (!result.ok) {
     if (result.status === 404) {
@@ -33,6 +40,9 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
   }
 
   const { ticket } = result;
+  const nextStatus = getNextRepairStatus(ticket.status);
+  const canUpdateStatus = user.role === "ADMIN" || (user.role === "TECHNICIAN" && ticket.technicianId === user.id);
+  const canAddRepairLog = canUpdateStatus;
   const lookupUrl = buildTicketLookupUrl(ticket.ticketId);
   const qrCodeUrl = buildTicketQrCodeUrl(ticket.ticketId);
 
@@ -69,6 +79,10 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.device.owner.fullName}</p>
           </article>
           <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Assigned technician</p>
+            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.technician?.fullName ?? "Not assigned"}</p>
+          </article>
+          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Photo URL</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.photoUrl ?? "Not provided"}</p>
           </article>
@@ -81,6 +95,37 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
           </article>
         </div>
 
+        {user.role === "ADMIN" ? (
+          <div className="mt-8">
+            <TechnicianAssignmentForm
+              currentTechnicianId={ticket.technicianId}
+              technicians={technicians.map((technician) => ({
+                id: technician.id,
+                fullName: technician.fullName,
+                email: technician.email,
+              }))}
+              ticketId={ticket.id}
+            />
+          </div>
+        ) : null}
+
+        {canUpdateStatus && nextStatus ? (
+          <div className="mt-8">
+            <StatusUpdateForm
+              currentStatus={ticket.status}
+              nextStatus={nextStatus}
+              nextStatusLabel={REPAIR_STATUS_LABELS[nextStatus]}
+              ticketId={ticket.id}
+            />
+          </div>
+        ) : null}
+
+        {canAddRepairLog ? (
+          <div className="mt-8">
+            <RepairLogForm ticketId={ticket.id} />
+          </div>
+        ) : null}
+
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-[var(--foreground)]">Timeline</h2>
           <div className="mt-4 grid gap-4">
@@ -90,6 +135,9 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
                   <p className="text-sm font-semibold text-[var(--foreground)]">{REPAIR_STATUS_LABELS[log.status]}</p>
                   <p className="text-sm text-[var(--muted)]">{new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(log.createdAt)}</p>
                 </div>
+                {log.technician ? (
+                  <p className="mt-2 text-sm text-[var(--muted)]">Technician: {log.technician.fullName}</p>
+                ) : null}
                 <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{log.repairNotes ?? "No repair note recorded."}</p>
                 {log.diagnosis ? <p className="mt-2 text-sm leading-7 text-[var(--muted)]">Diagnosis: {log.diagnosis}</p> : null}
               </article>
