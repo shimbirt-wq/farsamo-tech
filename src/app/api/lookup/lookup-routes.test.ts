@@ -65,5 +65,8 @@ describe("lookup route handlers", () => {
     );
     expect(body.ticket.owner).toBeUndefined();
     expect(body.ticket.logs).toBeUndefined();
+    expect(body.ticket.issueDescription).toBeUndefined();
+    expect(body.ticket.photoUrl).toBeUndefined();
+    expect(body.ticket.technician).toBeUndefined();
   });
 });

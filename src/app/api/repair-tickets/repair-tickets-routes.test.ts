@@ -362,4 +362,17 @@ describe("repair ticket route handlers", () => {
     expect(body.error).toBe("You do not have permission to access this repair ticket.");
     vi.unstubAllEnvs();
   });
+
+  it("requires authentication for full ticket detail", async () => {
+    const { GET } = await import("./[ticketId]/route");
+
+    const response = await GET(buildRequest("/api/repair-tickets/ticket_1"), {
+      params: Promise.resolve({ ticketId: "ticket_1" }),
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body.error).toBe("Authentication required.");
+    expect(mockPrisma.repairTicket.findUnique).not.toHaveBeenCalled();
+  });
 });
