@@ -20,9 +20,17 @@ Run Prisma migrations from a controlled environment before promoting the deploym
 npx prisma migrate deploy
 ```
 
+Recommended rollout:
+
+1. Apply migrations with `npx prisma migrate deploy`.
+2. Deploy a Vercel preview and run smoke tests for login, registration, ticket creation, lookup, reports, and photo upload.
+3. Promote only after `/api/health` returns `environment.ok: true`.
+
 ## Supabase
 
 Use Supabase PostgreSQL for application records and Supabase Storage, or another object-storage provider, for repair ticket photos. Store only the generated object path or public/signed URL in `repair_tickets.photo_url`.
+
+Before production launch, enable Supabase automated backups or an equivalent PostgreSQL backup policy. Keep `DATABASE_URL` pointed at the pooled runtime connection and reserve `DIRECT_URL` for migrations.
 
 ## Readiness Checks
 
@@ -30,4 +38,5 @@ Use Supabase PostgreSQL for application records and Supabase Storage, or another
 - Auth cookies are HTTP-only and become `secure` when `NODE_ENV=production`.
 - Security headers are configured in `next.config.ts`.
 - Login and registration routes use lightweight in-process rate limiting.
+- Server responses use standardized JSON error bodies and avoid stack traces.
 - Do not commit `.env` or production secrets.

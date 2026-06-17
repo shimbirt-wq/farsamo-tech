@@ -8,6 +8,29 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   UPLOAD_MAX_SIZE_MB: z.coerce.number().int().positive().default(5),
   UPLOAD_PUBLIC_BASE_URL: z.string().url().optional(),
+  UPLOAD_BUCKET: z.string().min(3).max(64).regex(/^[a-z0-9][a-z0-9-]+$/, "Upload bucket must be a lowercase storage bucket name").default("repair-ticket-photos"),
+  SUPABASE_URL: z.string().url().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20).optional(),
+}).superRefine((env, context) => {
+  if (env.NODE_ENV !== "production") {
+    return;
+  }
+
+  if (!env.SUPABASE_URL) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["SUPABASE_URL"],
+      message: "SUPABASE_URL is required in production for repair photo uploads.",
+    });
+  }
+
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["SUPABASE_SERVICE_ROLE_KEY"],
+      message: "SUPABASE_SERVICE_ROLE_KEY is required in production for repair photo uploads.",
+    });
+  }
 });
 
 export type ValidatedEnvironment = z.infer<typeof envSchema>;
