@@ -1,92 +1,152 @@
 import Link from "next/link";
 
+const workflowSteps = [
+  "Register device",
+  "Submit repair request",
+  "Technician diagnosis",
+  "Track until collection",
+];
+
+const roleBenefits = [
+  {
+    title: "Students",
+    body: "Submit personal device requests, track status, and keep a repair history.",
+  },
+  {
+    title: "Lecturers",
+    body: "Register institutional or personal devices and follow maintenance progress.",
+  },
+  {
+    title: "Technicians",
+    body: "Focus on assigned tickets, diagnosis notes, repair updates, and work queues.",
+  },
+  {
+    title: "Admins",
+    body: "Monitor workload, assign technicians, manage users, and review reports.",
+  },
+];
+
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(11,120,107,0.16),_transparent_38%),linear-gradient(180deg,_#f5f8ff_0%,_#f3efe7_100%)]">
-      <section className="border-b border-[var(--border)] bg-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10 lg:px-8">
+    <main className="app-shell">
+      <section className="border-b border-[var(--border)] bg-white">
+        <div className="page-container">
           <nav className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">
-                XeelTech Solutions
-              </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-normal text-[var(--foreground)] sm:text-5xl">
-                FarsamoTech Repair Hub
-              </h1>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/auth/login"
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
-                Sign in
+            <Link href="/" className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)] text-sm font-black text-white">
+                FT
+              </span>
+              <span>
+                <span className="block text-base font-bold text-[var(--foreground)]">FarsamoTech</span>
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                  Repair Hub
+                </span>
+              </span>
+            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/auth/login" className="btn-secondary">
+                Login
               </Link>
-              <Link
-                href="/auth/register"
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href="/auth/register" className="btn-primary">
                 Register
-              </Link>
-              <Link
-                href="/admin/users"
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
-                Admin users
-              </Link>
-              <Link
-                href="/devices"
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
-                Devices
-              </Link>
-              <Link
-                href="/repair-tickets"
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
-                Repair tickets
-              </Link>
-              <Link
-                href="/api/health"
-                className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-              >
-                API health
               </Link>
             </div>
           </nav>
+        </div>
+      </section>
 
-          <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
-            <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--accent-strong)]">
-                Feature 5
-              </p>
-              <h2 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">
-                Profile access and admin user management are live on this branch
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-                Users can inspect their own safe profile fields, while admins get a searchable user directory and a
-                controlled role update flow that never exposes password hashes.
-              </p>
+      <section className="page-container grid items-center gap-8 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
+        <div>
+          <p className="eyebrow">SIMAD University repair operations</p>
+          <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-normal text-[var(--foreground)] sm:text-5xl">
+            Centralized computer repair tracking for SIMAD University.
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--muted-strong)]">
+            Submit repair requests, track device progress, manage technician workflows, and preserve repair history in
+            one professional operations platform.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/auth/login" className="btn-primary">
+              Login
+            </Link>
+            <Link href="/repair-tickets" className="btn-secondary">
+              Request repair
+            </Link>
+            <Link href="/lookup/TCK-LOCAL-0001" className="btn-ghost">
+              Try ticket lookup
+            </Link>
+          </div>
+        </div>
+
+        <div className="panel overflow-hidden">
+          <div className="border-b border-[var(--border)] bg-[var(--surface-alt)] px-5 py-4">
+            <p className="text-sm font-bold text-[var(--foreground)]">Operations snapshot</p>
+            <p className="mt-1 text-sm text-[var(--muted)]">Live repair workflow preview</p>
+          </div>
+          <div className="grid gap-4 p-5">
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                ["Open tickets", "24"],
+                ["In repair", "8"],
+                ["Ready", "5"],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-xl border border-[var(--border)] bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{label}</p>
+                  <p className="mt-2 text-2xl font-bold text-[var(--foreground)]">{value}</p>
+                </div>
+              ))}
             </div>
-
-            <div className="grid gap-4">
-              <article className="rounded-[1.75rem] border border-[var(--border)] bg-white p-6 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Profile</p>
-                <h3 className="mt-3 text-xl font-semibold text-[var(--foreground)]">Current user page</h3>
-                <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                  Safe public fields only, with password hashes excluded from API and UI responses.
-                </p>
-              </article>
-              <article className="rounded-[1.75rem] border border-[var(--border)] bg-white p-6 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Admin</p>
-                <h3 className="mt-3 text-xl font-semibold text-[var(--foreground)]">Search, paginate, update roles</h3>
-                <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                  Admin-only user listing and safe role changes, including a last-admin guard.
-                </p>
-              </article>
+            <div className="rounded-xl border border-[var(--border)] bg-white">
+              {[
+                ["TCK-LOCAL-0001", "Lenovo ThinkPad", "Diagnosis in Progress", "status-diagnosis"],
+                ["TCK-LOCAL-0002", "Dell OptiPlex", "Registration Completed", "status-registration"],
+                ["TCK-LOCAL-0003", "HP ProBook", "Ready for Collection", "status-ready"],
+              ].map(([ticket, device, status, className]) => (
+                <div key={ticket} className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] p-4 last:border-b-0">
+                  <div>
+                    <p className="text-sm font-bold text-[var(--foreground)]">{ticket}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">{device}</p>
+                  </div>
+                  <span className={`status-badge ${className}`}>{status}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
+
+      <section className="page-container pt-0">
+        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="panel p-6">
+            <p className="eyebrow">How it works</p>
+            <div className="mt-5 grid gap-3">
+              {workflowSteps.map((step, index) => (
+                <div key={step} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white p-4">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent)] text-sm font-bold text-white">
+                    {index + 1}
+                  </span>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">{step}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {roleBenefits.map((item) => (
+              <article key={item.title} className="panel p-5">
+                <h2 className="text-lg font-bold text-[var(--foreground)]">{item.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{item.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="page-container">
+        <div className="border-t border-[var(--border)] py-6 text-sm text-[var(--muted)]">
+          FarsamoTech Repair Hub - XeelTech Solutions - SIMAD University
+        </div>
+      </footer>
     </main>
   );
 }

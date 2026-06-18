@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { redirect } from "next/navigation";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
@@ -41,39 +42,40 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const overview = await getReportsOverview(prisma, filters);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Admin reports</p>
-          <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">Reports and analytics</h1>
-        </div>
-        <Link href="/" className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold">
-          Home
+    <AppShell
+      active="reports"
+      eyebrow="Admin reports"
+      title="Reports and analytics"
+      user={user}
+      actions={
+        <Link href="/dashboard" className="btn-secondary">
+          Dashboard
         </Link>
-      </div>
+      }
+    >
 
-      <form className="mt-8 grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:grid-cols-[1fr_1fr_auto]">
+      <form className="grid gap-4 rounded-xl border border-[var(--border)] bg-white p-5 sm:grid-cols-[1fr_1fr_auto]">
         <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
           From
-          <input name="dateFrom" type="date" defaultValue={filters.dateFrom ?? ""} className="rounded-xl border border-[var(--border)] px-4 py-3" />
+          <input name="dateFrom" type="date" defaultValue={filters.dateFrom ?? ""} className="field-control" />
         </label>
         <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
           To
-          <input name="dateTo" type="date" defaultValue={filters.dateTo ?? ""} className="rounded-xl border border-[var(--border)] px-4 py-3" />
+          <input name="dateTo" type="date" defaultValue={filters.dateTo ?? ""} className="field-control" />
         </label>
-        <button className="self-end rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white">Apply</button>
+        <button className="btn-primary self-end">Apply</button>
       </form>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-3">
-        <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+        <article className="panel p-5">
           <p className="text-sm text-[var(--muted)]">Tickets</p>
           <p className="mt-2 text-3xl font-semibold">{overview.totals.tickets}</p>
         </article>
-        <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+        <article className="panel p-5">
           <p className="text-sm text-[var(--muted)]">Active</p>
           <p className="mt-2 text-3xl font-semibold">{overview.totals.active}</p>
         </article>
-        <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+        <article className="panel p-5">
           <p className="text-sm text-[var(--muted)]">Completed</p>
           <p className="mt-2 text-3xl font-semibold">{overview.totals.completed}</p>
         </article>
@@ -93,13 +95,13 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           ])}
         />
       </section>
-    </main>
+    </AppShell>
   );
 }
 
 function ReportTable({ title, rows }: { title: string; rows: Array<[string, string | number]> }) {
   return (
-    <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+    <article className="panel p-5">
       <h2 className="text-lg font-semibold text-[var(--foreground)]">{title}</h2>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-left text-sm">

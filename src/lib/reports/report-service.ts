@@ -122,7 +122,7 @@ export async function getReportsOverview(prisma: PrismaClient, input: ReportDate
   >();
 
   for (const ticket of tickets) {
-    increment(facultyCounts, ticket.device.owner.faculty ?? "Unspecified");
+    increment(facultyCounts, ticket.device.owner?.faculty ?? "Unspecified");
     increment(deviceTypeCounts, ticket.device.deviceType);
     increment(monthlyCounts, monthKey(ticket.createdAt));
 

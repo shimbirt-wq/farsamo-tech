@@ -44,7 +44,7 @@ export function RepairLogForm({ ticketId }: RepairLogFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="panel p-6">
       <div className="grid gap-4">
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Diagnosis
@@ -52,7 +52,7 @@ export function RepairLogForm({ ticketId }: RepairLogFormProps) {
             name="diagnosis"
             rows={4}
             placeholder="Record the diagnosis or technical findings."
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -61,7 +61,7 @@ export function RepairLogForm({ ticketId }: RepairLogFormProps) {
             name="repairNotes"
             rows={4}
             placeholder="Record the repair work completed or next action."
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
       </div>
@@ -72,7 +72,7 @@ export function RepairLogForm({ ticketId }: RepairLogFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Saving..." : "Add repair log"}
         </button>

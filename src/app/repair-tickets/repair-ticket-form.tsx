@@ -71,15 +71,15 @@ export function RepairTicketForm({ devices }: RepairTicketFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Repair request</p>
+    <form onSubmit={handleSubmit} className="panel p-6">
+      <p className="eyebrow">Repair request</p>
       <div className="mt-6 grid gap-4">
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Registered device
           <select
             name="deviceId"
             required
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           >
             <option value="">Select a device</option>
             {devices.map((device) => (
@@ -96,7 +96,7 @@ export function RepairTicketForm({ devices }: RepairTicketFormProps) {
             required
             rows={5}
             placeholder="Describe the issue clearly so the technician can start from the right context."
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -105,7 +105,7 @@ export function RepairTicketForm({ devices }: RepairTicketFormProps) {
             name="photo"
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
       </div>
@@ -116,7 +116,7 @@ export function RepairTicketForm({ devices }: RepairTicketFormProps) {
         <button
           type="submit"
           disabled={isPending || devices.length === 0}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Submitting..." : "Create ticket"}
         </button>

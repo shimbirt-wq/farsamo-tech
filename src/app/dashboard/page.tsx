@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { redirect } from "next/navigation";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
 import { getRoleDashboard } from "@/lib/dashboard/dashboard-service";
 import { REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
+import { StatusBadge } from "@/app/repair-tickets/status-badge";
 
 function MetricCard({ label, value }: { label: string; value: number }) {
   return (
-    <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+    <article className="panel p-5">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
       <p className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{value}</p>
     </article>
@@ -24,31 +26,31 @@ export default async function DashboardPage() {
   const dashboard = await getRoleDashboard(prisma, user);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Dashboard</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{user.role} dashboard</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
-              Role-scoped operational summaries are computed server-side so each account only sees the dashboard data it is allowed to access.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
+    <AppShell
+      active="dashboard"
+      eyebrow="Dashboard"
+      title={`${user.role} dashboard`}
+      user={user}
+      actions={
+        <>
             <Link
               href="/profile"
-              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+              className="btn-secondary"
             >
               Profile
             </Link>
             <Link
               href="/repair-tickets"
-              className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              className="btn-primary"
             >
               Repair tickets
             </Link>
-          </div>
-        </div>
+        </>
+      }
+    >
+        <p className="max-w-3xl text-sm leading-7 text-[var(--muted)]">
+          Role-scoped operational summaries are computed server-side so each account only sees the dashboard data it is allowed to access.
+        </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {dashboard.role === "STUDENT" || dashboard.role === "LECTURER" ? (
@@ -83,15 +85,17 @@ export default async function DashboardPage() {
             <div className="mt-4 grid gap-4">
               {dashboard.recentRepairHistory.length > 0 ? (
                 dashboard.recentRepairHistory.map((ticket) => (
-                  <article key={ticket.id} className="rounded-2xl border border-[var(--border)] bg-white p-5">
+                  <article key={ticket.id} className="panel p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-base font-semibold text-[var(--foreground)]">{ticket.ticketId}</p>
-                        <p className="mt-2 text-sm text-[var(--muted)]">{REPAIR_STATUS_LABELS[ticket.status]}</p>
+                        <div className="mt-2">
+                          <StatusBadge status={ticket.status} />
+                        </div>
                       </div>
                       <Link
                         href={`/repair-tickets/${ticket.id}`}
-                        className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+                        className="btn-secondary"
                       >
                         View ticket
                       </Link>
@@ -99,7 +103,7 @@ export default async function DashboardPage() {
                   </article>
                 ))
               ) : (
-                <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+                <article className="panel p-5">
                   <p className="text-sm text-[var(--muted)]">No repair history yet.</p>
                 </article>
               )}
@@ -112,12 +116,15 @@ export default async function DashboardPage() {
             <h2 className="text-xl font-semibold text-[var(--foreground)]">Status queue</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {dashboard.statusQueue.map((item) => (
-                <MetricCard key={item.status} label={item.label} value={item.count} />
+                <article key={item.status} className="panel p-5">
+                  <StatusBadge status={item.status} />
+                  <p className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{item.count}</p>
+                  <p className="mt-1 text-sm text-[var(--muted)]">{REPAIR_STATUS_LABELS[item.status]}</p>
+                </article>
               ))}
             </div>
           </div>
         ) : null}
-      </section>
-    </main>
+    </AppShell>
   );
 }

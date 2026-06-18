@@ -29,6 +29,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     email: "admin@example.invalid",
     passwordHash: "$2a$12$hash",
     role: "ADMIN",
+    isActive: true,
     createdAt: now,
     updatedAt: now,
     ...overrides,

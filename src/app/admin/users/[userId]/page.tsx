@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { notFound, redirect } from "next/navigation";
 import { RoleUpdateForm } from "@/app/admin/users/role-update-form";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
@@ -22,6 +23,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
   if (currentUser.role !== "ADMIN") {
     redirect("/profile?denied=admin-users");
   }
+
   const { userId } = await params;
   const user = await getUserById(prisma, userId);
 
@@ -30,55 +32,46 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Admin user detail</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{user.fullName}</h1>
-            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-              Review the public profile fields below and update the access role safely when needed.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/users"
-              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-            >
-              Back to list
-            </Link>
-            <Link
-              href={`/api/users/${user.id}`}
-              className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              Open JSON
-            </Link>
-          </div>
-        </div>
+    <AppShell
+      active="users"
+      eyebrow="Admin user detail"
+      title={user.fullName}
+      user={currentUser}
+      actions={
+        <>
+          <Link href="/admin/users" className="btn-secondary">
+            Back to list
+          </Link>
+          <Link href={`/api/users/${user.id}`} className="btn-primary">
+            Open JSON
+          </Link>
+        </>
+      }
+    >
+      <section className="panel p-6">
+        <p className="text-sm leading-7 text-[var(--muted)]">
+          Review the public profile fields below and update the access role safely when needed.
+        </p>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Email</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{user.email}</p>
-          </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Current role</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{user.role}</p>
-          </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">University ID</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{user.universityId ?? "Not provided"}</p>
-          </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Phone</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{user.phone ?? "Not provided"}</p>
-          </article>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {[
+            ["Email", user.email],
+            ["Current role", user.role],
+            ["Account status", user.isActive ? "Active" : "Inactive"],
+            ["University ID", user.universityId ?? "Not provided"],
+            ["Phone", user.phone ?? "Not provided"],
+          ].map(([label, value]) => (
+            <article key={label} className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
+              <p className="mt-3 text-base font-medium text-[var(--foreground)]">{value}</p>
+            </article>
+          ))}
         </div>
 
         <div className="mt-8">
-          <RoleUpdateForm currentRole={user.role} userId={user.id} />
+          <RoleUpdateForm currentIsActive={user.isActive} currentRole={user.role} userId={user.id} />
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

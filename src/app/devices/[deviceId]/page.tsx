@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
@@ -32,45 +33,36 @@ export default async function DeviceDetailPage({ params }: DeviceDetailPageProps
   const { device } = result;
 
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Device detail</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">
-              {device.brand} {device.model}
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-              This device remains separate from repair tickets so its repair history can accumulate over time.
-            </p>
-          </div>
-          <Link
-            href="/devices"
-            className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-          >
-            Back to devices
-          </Link>
-        </div>
+    <AppShell
+      active="devices"
+      eyebrow="Device detail"
+      title={`${device.brand} ${device.model}`}
+      user={user}
+      actions={
+        <Link href="/devices" className="btn-secondary">
+          Back to devices
+        </Link>
+      }
+    >
+      <section className="panel p-6">
+        <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
+          This device remains separate from repair tickets so its repair history can accumulate over time.
+        </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Device type</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{device.deviceType}</p>
-          </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Serial number</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{device.serialNumber ?? "Not provided"}</p>
-          </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Owner</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{device.owner.fullName}</p>
-          </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Owner email</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{device.owner.email}</p>
-          </article>
+          {[
+            ["Device type", device.deviceType],
+            ["Serial number", device.serialNumber ?? "Not provided"],
+            ["Owner", device.owner.fullName],
+            ["Owner email", device.owner.email],
+          ].map(([label, value]) => (
+            <article key={label} className="rounded-xl border border-[var(--border)] bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
+              <p className="mt-3 text-base font-medium text-[var(--foreground)]">{value}</p>
+            </article>
+          ))}
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

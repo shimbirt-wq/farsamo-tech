@@ -18,6 +18,7 @@ async function main() {
         phone: user.phone,
         passwordHash: user.passwordHash,
         role: user.role,
+        isActive: user.isActive,
       },
       create: user,
     });

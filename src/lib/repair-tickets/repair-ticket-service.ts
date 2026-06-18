@@ -22,7 +22,7 @@ export type PublicRepairTicket = {
   updatedAt: Date;
   device: {
     id: string;
-    ownerId: string;
+    ownerId: string | null;
     deviceType: string;
     brand: string;
     model: string;
@@ -149,7 +149,7 @@ function toPublicRepairTicket(
     updatedAt: Date;
     device: {
       id: string;
-      ownerId: string;
+      ownerId: string | null;
       deviceType: string;
       brand: string;
       model: string;
@@ -178,7 +178,7 @@ function toRepairTicketDetail(
     } | null;
     device: {
       id: string;
-      ownerId: string;
+      ownerId: string | null;
       deviceType: string;
       brand: string;
       model: string;
@@ -188,7 +188,7 @@ function toRepairTicketDetail(
         fullName: string;
         email: string;
         universityId: string | null;
-      };
+      } | null;
     };
     logs: Array<{
       id: string;
@@ -204,7 +204,18 @@ function toRepairTicketDetail(
     }>;
   },
 ): RepairTicketDetail {
-  return ticket;
+  if (!ticket.device.ownerId || !ticket.device.owner) {
+    throw new Error("Owner-backed repair ticket expected.");
+  }
+
+  return {
+    ...ticket,
+    device: {
+      ...ticket.device,
+      ownerId: ticket.device.ownerId,
+      owner: ticket.device.owner,
+    },
+  };
 }
 
 function buildDateRangeFilter(input: RepairTicketListQuery) {
@@ -356,7 +367,12 @@ export async function listRepairTickets(
 
   const where =
     user.role === "ADMIN"
-      ? baseFilter
+      ? {
+          ...baseFilter,
+          device: {
+            ownerId: { not: null },
+          },
+        }
       : user.role === "TECHNICIAN"
         ? {
             ...baseFilter,
@@ -616,6 +632,15 @@ export async function updateRepairTicketStatus(
     };
   }
 
+  if (!ticket.device.ownerId) {
+    return {
+      ok: false,
+      status: 404,
+      message: "Repair ticket not found.",
+    };
+  }
+  const ownerId = ticket.device.ownerId;
+
   if (!canTransitionRepairStatus(ticket.status, input.status)) {
     return {
       ok: false,
@@ -644,7 +669,7 @@ export async function updateRepairTicketStatus(
 
     await tx.notification.create({
       data: {
-        userId: ticket.device.ownerId,
+        userId: ownerId,
         ticketId: ticket.id,
         channel: "DASHBOARD",
         status: "PENDING",

@@ -51,14 +51,14 @@ export function TechnicianAssignmentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="panel p-6">
       <div className="flex flex-wrap items-end gap-4">
         <label className="flex min-w-[260px] flex-1 flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Assign technician
           <select
             value={selectedTechnicianId}
             onChange={(event) => setSelectedTechnicianId(event.target.value)}
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           >
             <option value="">Select a technician</option>
             {technicians.map((technician) => (
@@ -71,7 +71,7 @@ export function TechnicianAssignmentForm({
         <button
           type="submit"
           disabled={isPending || selectedTechnicianId.length === 0}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Assigning..." : "Assign technician"}
         </button>

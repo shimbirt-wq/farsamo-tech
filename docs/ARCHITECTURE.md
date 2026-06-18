@@ -2,225 +2,392 @@
 
 ## System Overview
 
-FarsamoTech Repair Hub follows a full-stack Next.js architecture:
+FarsamoTech V2 should evolve into SIMAD IT Service Desk: a public request and tracking surface plus authenticated internal staff tools for triage, repair work, custody control, WhatsApp notifications, and management reporting.
+
+Current implementation remains unchanged during Phase 1. This document describes the target V2 architecture that future schema and UI work should follow.
 
 ```text
-Student / Lecturer / Technician / Admin
+Public requester
   ->
-Next.js App Router UI
+Public request and tracking pages
   ->
-Next.js Route Handlers and Server Modules
+Next.js route handlers / server modules
   ->
 Prisma ORM
   ->
-Supabase PostgreSQL
+PostgreSQL
   ->
-Reports, Analytics, Notifications, and QR Tracking
+Staff tools, custody tracking, reports, notifications
 ```
+
+Authenticated staff tools:
+
+```text
+Lead Technician / Technician / Admin
+  ->
+Staff-authenticated Next.js app
+  ->
+Authorization helpers
+  ->
+Domain services
+  ->
+Prisma / PostgreSQL
+```
+
+Notification delivery:
+
+```text
+Domain event
+  ->
+Notification provider abstraction
+  ->
+Dashboard record, WhatsApp provider, email provider, or future channel
+```
+
+## Architecture Principles
+
+- Public request submission should not require student or lecturer account creation.
+- Staff operations must remain authenticated and role-authorized.
+- Lead technician owns triage, assignment, prioritization, custody intake, and operational verification.
+- Technicians work from assigned queues.
+- Admins manage staff, configuration, and reports; they are not the daily dispatcher.
+- Ticket status and device custody status are separate concepts.
+- WhatsApp is the primary requester communication channel; the website is primarily for submit and track.
+- Domain logic should live in server modules and route handlers, not client-only UI checks.
+- Future migrations should preserve current MVP behavior until replacement flows are ready.
 
 ## Core Layers
 
-### Next.js UI Layer
+### Public Requester Layer
 
-The UI layer provides role-specific interfaces:
+The public layer supports students and lecturers without requiring login.
 
-- Student and lecturer repair request forms
-- Repair journey timeline
-- Technician dashboard
-- Admin dashboard
-- Analytics and reports views
-- Notification center
+Responsibilities:
 
-### Next.js Backend Layer
+- Public repair request form.
+- Maintenance-week quick intake form.
+- Tracking code confirmation.
+- Public tracking page with limited safe ticket data.
+- Pickup confirmation flow when enabled.
 
-Route Handlers and server-side modules own business rules and integrations:
+The public layer must not expose internal notes, staff-only data, full requester records, or private custody photos.
 
-- Authentication
-- Authorization
-- Input validation
-- Ticket creation
-- Technician assignment
-- Repair status transitions
+### Staff-Authenticated Internal Layer
+
+Staff users authenticate before accessing internal tools.
+
+Supported staff roles in the V2 target model:
+
+- Lead Technician
+- Technician
+- Admin
+
+Student/lecturer accounts are not required for the target public flow. If backward compatibility requires existing student users to remain temporarily, they should not drive the V2 product model.
+
+### Domain Services Layer
+
+Route handlers should delegate business logic to focused server modules.
+
+Target service areas:
+
+- Request intake
+- Tracking lookup
+- Triage
+- Assignment
+- Technician queue
 - Repair logs
-- Notification triggers
-- Report and analytics endpoints
-- QR code generation
+- Custody check-in and pickup
+- Notification events
+- Reports
+- Staff/user management
 
 ### Data Access Layer
 
-Prisma provides typed access to Supabase PostgreSQL. PostgreSQL stores normalized operational records for users, devices, tickets, logs, notifications, and technician activity.
+Prisma remains the preferred typed access layer for PostgreSQL.
 
-## Domain Modules
+Future schema changes should introduce V2 concepts incrementally:
 
-### Auth
+- Requester identity separate from staff users.
+- Ticket severity and repair method.
+- Lead technician triage metadata.
+- Device custody records.
+- Structured repair/audit events.
+- Notification delivery attempts.
 
-Responsibilities:
+## Target Domain Modules
 
-- Login
-- Token issuance
-- Token verification
-- Role-based route protection
+### Request Intake
 
-### Users
-
-Responsibilities:
-
-- Store student, lecturer, technician, and admin profiles
-- Enforce unique university IDs and emails
-- Support role-based access decisions
-
-### Devices
+Creates a ticket from public requester data.
 
 Responsibilities:
 
-- Store device ownership and identity
-- Associate devices with users
-- Preserve serial number and model history
+- Validate requester, contact, device, and issue fields.
+- Generate a tracking code.
+- Store requester and device details.
+- Set initial ticket status to Submitted.
+- Trigger ticket-received notification event.
+- Support short maintenance-week intake.
 
-### Repair Tickets
+### Tracking
 
-Responsibilities:
-
-- Create repair requests
-- Generate human-readable ticket IDs
-- Link tickets to devices and technicians
-- Track repair journey status
-- Store issue descriptions and submission metadata
-
-### Repair Logs
+Allows public users to check repair progress safely.
 
 Responsibilities:
 
-- Store technician diagnosis notes
-- Store repair notes
-- Preserve repair timeline history
-- Support auditing and reports
+- Validate tracking code.
+- Optionally require phone number plus code for stronger lookup.
+- Return limited timeline/status data.
+- Hide internal notes, sensitive staff details, private photos, and admin metadata.
 
-### Technician Activity
+### Lead Technician Command Center
+
+The operational control center.
 
 Responsibilities:
 
-- Track technician check-in and check-out
-- Track completed repairs
-- Support performance analytics
+- Show new requests.
+- Show waiting assignment, waiting student, not received, in repair, ready for pickup, and overdue queues.
+- Classify issue category.
+- Set severity.
+- Select repair method.
+- Assign or reassign technicians.
+- Request student action.
+- Initiate or supervise device check-in.
+- Verify completion.
+- Mark ready for pickup.
+- Close or cancel according to policy.
+
+### Technician Workspace
+
+Focused repair workspace.
+
+Responsibilities:
+
+- Show assigned queue.
+- Show ticket details required for repair.
+- Add diagnosis and repair notes.
+- Record parts required.
+- Update repair progress.
+- Request student action.
+- Submit work for verification.
+
+Technicians should not become the public support desk or random dispatchers.
+
+### Device Custody
+
+Tracks physical handling of devices.
+
+Responsibilities:
+
+- Record when a device is received.
+- Record device condition and accessories.
+- Store check-in photos where configured.
+- Track storage location.
+- Track who received, moved, released, and confirmed pickup.
+- Keep custody lifecycle separate from repair status.
+
+Custody status:
+
+```text
+Not Received
+Received
+In Repair Room
+Ready For Collection
+Collected
+```
 
 ### Notifications
 
-Responsibilities:
-
-- Create dashboard notification records
-- Trigger email notifications
-- Prepare future SMS and WhatsApp channels
-
-### Reports and Analytics
+Notifications should be event-driven and channel-agnostic.
 
 Responsibilities:
 
-- Most common problems
-- Repairs by faculty
-- Repairs by device type
-- Monthly repair trends
-- Technician performance
-- Average repair time
+- Create notification events from domain actions.
+- Store delivery attempts.
+- Route messages to configured providers.
+- Support dashboard records for staff.
+- Support WhatsApp-first requester messages.
+- Allow future email/SMS providers.
 
-## Repair Journey
+Provider abstraction:
 
-Repair status should follow a controlled lifecycle:
+```text
+NotificationEvent
+  ->
+NotificationProvider
+  ->
+send(message, recipient, metadata)
+```
 
-1. Registration Completed
-2. Device Received
-3. Diagnosis in Progress
-4. Repair in Progress
-5. Quality Inspection
-6. Ready for Collection
-7. Device Collected
+Initial implementation can use a stub/provider interface before real WhatsApp integration.
 
-Status changes should be recorded in logs so the platform can show a reliable timeline.
+### Admin Portal
 
-## Data Model Baseline
+Admin portal is for management, not daily dispatch.
 
-### users
+Responsibilities:
 
-- `id`
-- `full_name`
-- `university_id`
-- `faculty`
-- `department`
-- `phone`
-- `email`
-- `role`
+- Staff account management.
+- Role management.
+- Reports and analytics.
+- Maintenance-week planning/configuration.
+- System configuration.
+- Operational oversight.
 
-### devices
+## Target Lifecycle
 
-- `id`
-- `owner_id`
-- `device_type`
-- `brand`
-- `model`
-- `serial_number`
+### Ticket Status Lifecycle
 
-### repair_tickets
+Ticket status answers: what is happening with the repair?
 
-- `id`
-- `ticket_id`
-- `device_id`
-- `technician_id`
-- `issue_description`
-- `status`
-- `created_at`
+```text
+Submitted
+  ->
+Triage Review
+  ->
+Waiting for Device
+  ->
+Received
+  ->
+Assigned
+  ->
+Diagnosing
+  ->
+Waiting for Student / Waiting for Replacement Part / Repairing
+  ->
+Quality Check
+  ->
+Ready for Pickup
+  ->
+Closed
+```
 
-### repair_logs
+Cancellation may occur from defined states:
 
-- `id`
-- `ticket_id`
-- `diagnosis`
-- `repair_notes`
-- `updated_at`
+```text
+Submitted
+Triage Review
+Waiting for Device
+Waiting for Student
+```
 
-### technician_activity
+The exact transition matrix should be implemented in code during schema/workflow phases.
 
-- `id`
-- `technician_id`
-- `check_in`
-- `check_out`
-- `repairs_completed`
+### Custody Status Lifecycle
 
-## Required API Areas
+Custody status answers: where is the physical device?
 
-- `POST /auth/login`
-- `POST /users`
-- `GET /users/me`
-- `POST /devices`
-- `GET /devices`
-- `POST /repair-tickets`
-- `GET /repair-tickets`
-- `GET /repair-tickets/:id`
-- `PATCH /repair-tickets/:id/status`
-- `PATCH /repair-tickets/:id/assign`
-- `POST /repair-tickets/:id/logs`
-- `GET /reports/overview`
-- `GET /reports/technicians`
-- `GET /reports/problems`
+```text
+Not Received
+  ->
+Received
+  ->
+In Repair Room
+  ->
+Ready for Collection
+  ->
+Collected
+```
 
-Exact route names may change during implementation, but the API should preserve these capabilities.
+Remote support tickets can remain `Not Received` for the entire lifecycle.
 
 ## Authorization Model
 
-- Students and lecturers can create and view their own repair tickets.
-- Technicians can view assigned tickets and update repair progress for assigned work.
-- Admins can view all records, assign technicians, manage users, and access analytics.
-- System-level reports must not expose private user data beyond what the viewer role is allowed to access.
+### Public Requester
+
+Can:
+
+- Submit request.
+- Track limited status.
+- Confirm pickup when provided with a valid pickup code.
+
+Cannot:
+
+- View internal notes.
+- View staff dashboards.
+- Assign technicians.
+- View reports.
+
+### Lead Technician
+
+Can:
+
+- Triage new tickets.
+- Assign/reassign technicians.
+- Set severity and repair method.
+- Check in devices.
+- Verify completion.
+- Mark ready for pickup.
+- Close/cancel tickets according to policy.
+
+### Technician
+
+Can:
+
+- View assigned tickets.
+- Add diagnosis and repair notes.
+- Update allowed repair statuses.
+- Request student action.
+- Record required parts.
+
+Cannot:
+
+- Assign or reassign tickets by default.
+- Access unassigned tickets by default.
+- Manage staff or reports.
+
+### Admin
+
+Can:
+
+- Manage staff users and roles.
+- View management reports.
+- Configure service-desk settings.
+- Review operational metrics.
+
+Admin may have emergency override permissions, but daily dispatch belongs to lead technician.
+
+## Reporting Architecture
+
+Reports should derive from structured ticket, custody, and event data.
+
+Target reporting areas:
+
+- Repairs by faculty.
+- Most common issue categories.
+- Technician workload and performance.
+- Average triage time.
+- Average resolution time.
+- Tickets waiting for student.
+- Tickets waiting for replacement part.
+- Custody exceptions and overdue pickups.
+- Maintenance-week volume and throughput.
+
+## Backward Compatibility
+
+During the transition from the current MVP:
+
+- Keep current routes and UI working until replacement flows exist.
+- Do not remove student accounts until requester-based public intake is implemented and validated.
+- Introduce schema additions before deleting legacy assumptions.
+- Keep tests passing after each phase.
+- Migrate data carefully so existing tickets remain traceable.
 
 ## External Services
 
-### Email Service
+### WhatsApp Provider
 
-Used for repair journey updates and collection readiness notifications.
+Target channel for requester updates and pickup reminders.
 
-### QR Code Generator
+### Email Provider
 
-Used to create ticket QR codes for fast tracking and device lookup.
+Optional secondary channel for users who provide email.
 
-### Notification Engine
+### Object Storage
 
-Used to create dashboard notifications and coordinate future email, SMS, or WhatsApp delivery.
+Used for request photos and custody check-in photos. Access must be controlled.
+
+### QR/Tracking Code Support
+
+Used to open public tracking pages or quick staff lookup during maintenance week.

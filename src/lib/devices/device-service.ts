@@ -48,6 +48,23 @@ const publicDeviceSelect = {
   },
 } as const;
 
+type SelectedPublicDevice = {
+  id: string;
+  ownerId: string | null;
+  deviceType: string;
+  brand: string;
+  model: string;
+  serialNumber: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  owner: {
+    id: string;
+    fullName: string;
+    email: string;
+    universityId: string | null;
+  } | null;
+};
+
 function buildDeviceSearchFilter(query?: string) {
   if (!query) {
     return {};
@@ -67,24 +84,17 @@ function buildDeviceSearchFilter(query?: string) {
 }
 
 function toPublicDevice(
-  device: {
-    id: string;
-    ownerId: string;
-    deviceType: string;
-    brand: string;
-    model: string;
-    serialNumber: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    owner: {
-      id: string;
-      fullName: string;
-      email: string;
-      universityId: string | null;
-    };
-  },
+  device: SelectedPublicDevice,
 ): PublicDevice {
-  return device;
+  if (!device.ownerId || !device.owner) {
+    throw new Error("Owner-backed device expected.");
+  }
+
+  return {
+    ...device,
+    ownerId: device.ownerId,
+    owner: device.owner,
+  };
 }
 
 export async function createDevice(
@@ -140,7 +150,7 @@ export async function listDevices(
     user.role === "ADMIN"
       ? {
           ...searchFilter,
-          ...(input.ownerId ? { ownerId: input.ownerId } : {}),
+          ownerId: input.ownerId ? input.ownerId : { not: null },
         }
       : {
           ownerId: user.id,

@@ -67,6 +67,7 @@ export async function listAssignableTechnicians(prisma: PrismaClient): Promise<A
   const users = await prisma.user.findMany({
     where: {
       role: "TECHNICIAN" satisfies UserRole,
+      isActive: true,
     },
     select: publicUserSelect,
     orderBy: [{ fullName: "asc" }, { id: "asc" }],
@@ -92,7 +93,7 @@ export async function updateUserRole(
 > {
   const existingUser = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, role: true },
+    select: { id: true, role: true, isActive: true },
   });
 
   if (!existingUser) {
@@ -103,9 +104,15 @@ export async function updateUserRole(
     };
   }
 
-  if (existingUser.role === "ADMIN" && input.role !== "ADMIN") {
+  const wouldRemoveActiveAdmin =
+    existingUser.role === "ADMIN" && existingUser.isActive && (input.role !== "ADMIN" || input.isActive === false);
+
+  if (wouldRemoveActiveAdmin) {
     const adminCount = await prisma.user.count({
-      where: { role: "ADMIN" satisfies UserRole },
+      where: {
+        role: "ADMIN" satisfies UserRole,
+        isActive: true,
+      },
     });
 
     if (adminCount <= 1) {
@@ -119,7 +126,10 @@ export async function updateUserRole(
 
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { role: input.role },
+    data: {
+      role: input.role,
+      ...(typeof input.isActive === "boolean" ? { isActive: input.isActive } : {}),
+    },
     select: publicUserSelect,
   });
 

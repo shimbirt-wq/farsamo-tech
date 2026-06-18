@@ -9,13 +9,14 @@ export type PublicUser = {
   phone: string | null;
   email: string;
   role: UserRole;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
 
 type UserForPublicResponse = Pick<
   User,
-  "id" | "fullName" | "universityId" | "faculty" | "department" | "phone" | "email" | "role" | "createdAt" | "updatedAt"
+  "id" | "fullName" | "universityId" | "faculty" | "department" | "phone" | "email" | "role" | "isActive" | "createdAt" | "updatedAt"
 >;
 
 export const publicUserSelect = {
@@ -27,6 +28,7 @@ export const publicUserSelect = {
   phone: true,
   email: true,
   role: true,
+  isActive: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -41,6 +43,7 @@ export function toPublicUser(user: UserForPublicResponse): PublicUser {
     phone: user.phone,
     email: user.email,
     role: user.role,
+    isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

@@ -14,6 +14,7 @@ export type LocalSeedUser = {
   email: string;
   passwordHash: string;
   role: UserRole;
+  isActive: boolean;
 };
 
 export type LocalSeedDevice = {
@@ -86,6 +87,7 @@ export function buildLocalSeedData(passwordHash: string): LocalSeedData {
       email: `admin@${LOCAL_SEED_EMAIL_DOMAIN}`,
       passwordHash,
       role: "ADMIN",
+      isActive: true,
     },
     {
       id: "seed_technician_001",
@@ -97,6 +99,19 @@ export function buildLocalSeedData(passwordHash: string): LocalSeedData {
       email: `technician@${LOCAL_SEED_EMAIL_DOMAIN}`,
       passwordHash,
       role: "TECHNICIAN",
+      isActive: true,
+    },
+    {
+      id: "seed_lead_technician_001",
+      fullName: "Local Lead Technician",
+      universityId: "SIMAD-TEST-LEAD-TECH",
+      faculty: "Operations",
+      department: "Computer Maintenance",
+      phone: "+252610000005",
+      email: `lead-technician@${LOCAL_SEED_EMAIL_DOMAIN}`,
+      passwordHash,
+      role: "LEAD_TECHNICIAN",
+      isActive: true,
     },
     {
       id: "seed_student_001",
@@ -108,6 +123,7 @@ export function buildLocalSeedData(passwordHash: string): LocalSeedData {
       email: `student@${LOCAL_SEED_EMAIL_DOMAIN}`,
       passwordHash,
       role: "STUDENT",
+      isActive: true,
     },
     {
       id: "seed_lecturer_001",
@@ -119,6 +135,7 @@ export function buildLocalSeedData(passwordHash: string): LocalSeedData {
       email: `lecturer@${LOCAL_SEED_EMAIL_DOMAIN}`,
       passwordHash,
       role: "LECTURER",
+      isActive: true,
     },
   ];
 

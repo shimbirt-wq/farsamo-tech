@@ -22,7 +22,7 @@ export type AuthorizationResult<T = PublicUser> = AuthorizationSuccess<T> | Auth
 
 export type AuthorizedTicketAccess = {
   id: string;
-  ownerId: string;
+  ownerId: string | null;
   technicianId: string | null;
 };
 
@@ -83,6 +83,10 @@ export async function requireAuthenticatedUser(
   }
 
   const publicUser = toPublicUser(user);
+
+  if (!publicUser.isActive) {
+    return AUTHORIZATION_ERRORS.unauthenticated;
+  }
 
   return {
     ok: true,

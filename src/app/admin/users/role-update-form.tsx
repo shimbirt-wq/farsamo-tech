@@ -4,11 +4,13 @@ import { UserRole } from "@prisma/client";
 import { useState, useTransition } from "react";
 
 type RoleUpdateFormProps = {
+  currentIsActive: boolean;
   currentRole: UserRole;
   userId: string;
 };
 
-export function RoleUpdateForm({ currentRole, userId }: RoleUpdateFormProps) {
+export function RoleUpdateForm({ currentIsActive, currentRole, userId }: RoleUpdateFormProps) {
+  const [isActive, setIsActive] = useState(currentIsActive);
   const [selectedRole, setSelectedRole] = useState<UserRole>(currentRole);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -23,29 +25,29 @@ export function RoleUpdateForm({ currentRole, userId }: RoleUpdateFormProps) {
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ role: selectedRole }),
+        body: JSON.stringify({ role: selectedRole, isActive }),
       });
 
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
 
       if (!response.ok) {
-        setMessage(body?.error ?? "Unable to update the user role.");
+        setMessage(body?.error ?? "Unable to update the user access.");
         return;
       }
 
-      setMessage("Role updated successfully.");
+      setMessage("User access updated successfully.");
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="panel p-6">
       <div className="flex flex-wrap items-end gap-4">
         <label className="flex min-w-[220px] flex-1 flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
-          Update role
+          Role
           <select
             value={selectedRole}
             onChange={(event) => setSelectedRole(event.target.value as UserRole)}
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           >
             {Object.values(UserRole).map((role) => (
               <option key={role} value={role}>
@@ -54,12 +56,21 @@ export function RoleUpdateForm({ currentRole, userId }: RoleUpdateFormProps) {
             ))}
           </select>
         </label>
+        <label className="flex items-center gap-3 rounded-lg border border-[var(--border-strong)] bg-white px-4 py-3 text-sm font-medium text-[var(--foreground)]">
+          <input
+            type="checkbox"
+            checked={isActive}
+            onChange={(event) => setIsActive(event.target.checked)}
+            className="h-4 w-4 accent-[var(--accent)]"
+          />
+          Active account
+        </label>
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isPending ? "Saving..." : "Save role"}
+          {isPending ? "Saving..." : "Save access"}
         </button>
       </div>
       {message ? <p className="mt-4 text-sm text-[var(--muted-strong)]">{message}</p> : null}

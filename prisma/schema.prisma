@@ -12,6 +12,7 @@ enum UserRole {
   STUDENT
   LECTURER
   TECHNICIAN
+  LEAD_TECHNICIAN
   ADMIN
 }
 
@@ -25,9 +26,55 @@ enum RepairStatus {
   DEVICE_COLLECTED
 }
 
+enum Severity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum RepairMethod {
+  REMOTE_SUPPORT
+  WALK_IN_SERVICE
+  HARDWARE_REPAIR
+  SOFTWARE_REPAIR
+}
+
+enum CustodyStatus {
+  NOT_RECEIVED
+  RECEIVED
+  IN_REPAIR_ROOM
+  READY_FOR_COLLECTION
+  COLLECTED
+}
+
+enum RequesterType {
+  STUDENT
+  LECTURER
+  STAFF
+  OTHER
+}
+
+enum RepairEventType {
+  TICKET_CREATED
+  TRIAGE_UPDATED
+  STATUS_CHANGED
+  CUSTODY_CHANGED
+  TECHNICIAN_ASSIGNED
+  REPAIR_NOTE_ADDED
+  STUDENT_ACTION_REQUESTED
+  PART_REQUIREMENT_ADDED
+  READY_FOR_PICKUP
+  PICKUP_CONFIRMED
+  TICKET_CLOSED
+  TICKET_CANCELLED
+}
+
 enum NotificationChannel {
   DASHBOARD
+  WHATSAPP
   EMAIL
+  SMS
 }
 
 enum NotificationStatus {
@@ -35,6 +82,20 @@ enum NotificationStatus {
   SENT
   FAILED
   READ
+}
+
+enum NotificationEventType {
+  TICKET_RECEIVED
+  TRIAGE_COMPLETED
+  BRING_DEVICE_REQUESTED
+  DEVICE_RECEIVED
+  TECHNICIAN_ASSIGNED
+  WAITING_FOR_STUDENT
+  REPLACEMENT_PART_REQUIRED
+  READY_FOR_PICKUP
+  PICKUP_REMINDER
+  TICKET_CLOSED
+  TICKET_CANCELLED
 }
 
 model User {
@@ -47,58 +108,122 @@ model User {
   email              String               @unique
   passwordHash       String               @map("password_hash")
   role               UserRole             @default(STUDENT)
+  isActive           Boolean              @default(true) @map("is_active")
   devices            Device[]
   assignedTickets    RepairTicket[]       @relation("TechnicianTickets")
+  triagedTickets     RepairTicket[]       @relation("TriagedTickets")
   repairLogs         RepairLog[]          @relation("RepairLogTechnician")
+  repairEvents       RepairEvent[]        @relation("RepairEventActor")
+  custodyReceived    DeviceCustody[]      @relation("CustodyReceivedBy")
+  custodyReleased    DeviceCustody[]      @relation("CustodyReleasedBy")
   technicianActivity TechnicianActivity[]
   notifications      Notification[]
   createdAt          DateTime             @default(now()) @map("created_at")
   updatedAt          DateTime             @updatedAt @map("updated_at")
 
   @@index([role])
+  @@index([isActive])
   @@index([faculty])
   @@index([createdAt])
   @@map("users")
 }
 
+model Requester {
+  id            String         @id @default(cuid())
+  requesterType RequesterType  @map("requester_type")
+  fullName      String         @map("full_name")
+  universityId  String?        @map("university_id")
+  faculty       String?
+  department    String?
+  phone         String
+  email         String?
+  devices       Device[]
+  tickets       RepairTicket[]
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@index([requesterType])
+  @@index([universityId])
+  @@index([phone])
+  @@index([email])
+  @@index([createdAt])
+  @@map("requesters")
+}
+
 model Device {
-  id           String         @id @default(cuid())
-  ownerId      String         @map("owner_id")
-  owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  deviceType   String         @map("device_type")
+  id           String          @id @default(cuid())
+  ownerId      String?         @map("owner_id")
+  owner        User?           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  requesterId  String?         @map("requester_id")
+  requester    Requester?      @relation(fields: [requesterId], references: [id], onDelete: SetNull)
+  deviceType   String          @map("device_type")
   brand        String
   model        String
-  serialNumber String?        @map("serial_number")
+  serialNumber String?         @map("serial_number")
+  assetTag     String?         @map("asset_tag")
+  description  String?
   tickets      RepairTicket[]
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  custody      DeviceCustody[]
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
 
   @@index([ownerId])
+  @@index([requesterId])
   @@index([serialNumber])
+  @@index([assetTag])
   @@index([deviceType])
   @@index([createdAt])
   @@map("devices")
 }
 
 model RepairTicket {
-  id               String         @id @default(cuid())
-  ticketId         String         @unique @map("ticket_id")
-  deviceId         String         @map("device_id")
-  device           Device         @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  technicianId     String?        @map("technician_id")
-  technician       User?          @relation("TechnicianTickets", fields: [technicianId], references: [id], onDelete: SetNull)
-  issueDescription String         @map("issue_description")
-  photoUrl         String?        @map("photo_url")
-  status           RepairStatus   @default(REGISTRATION_COMPLETED)
-  logs             RepairLog[]
-  notifications    Notification[]
-  createdAt        DateTime       @default(now()) @map("created_at")
-  updatedAt        DateTime       @updatedAt @map("updated_at")
+  id                    String         @id @default(cuid())
+  ticketId              String         @unique @map("ticket_id")
+  trackingCode          String?        @unique @map("tracking_code")
+  deviceId              String         @map("device_id")
+  device                Device         @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  requesterId           String?        @map("requester_id")
+  requester             Requester?     @relation(fields: [requesterId], references: [id], onDelete: SetNull)
+  technicianId          String?        @map("technician_id")
+  technician            User?          @relation("TechnicianTickets", fields: [technicianId], references: [id], onDelete: SetNull)
+  triagedById           String?        @map("triaged_by_id")
+  triagedBy             User?          @relation("TriagedTickets", fields: [triagedById], references: [id], onDelete: SetNull)
+  issueDescription      String         @map("issue_description")
+  issueCategory         String?        @map("issue_category")
+  photoUrl              String?        @map("photo_url")
+  severity              Severity?
+  repairMethod          RepairMethod?  @map("repair_method")
+  status                RepairStatus   @default(REGISTRATION_COMPLETED)
+  triageNotes           String?        @map("triage_notes")
+  studentActionRequired String?        @map("student_action_required")
+  partRequirement       String?        @map("part_requirement")
+  pickupCodeHash        String?        @map("pickup_code_hash")
+  logs                  RepairLog[]
+  events                RepairEvent[]
+  custody               DeviceCustody?
+  notifications         Notification[]
+  triagedAt             DateTime?      @map("triaged_at")
+  assignedAt            DateTime?      @map("assigned_at")
+  completedAt           DateTime?      @map("completed_at")
+  readyForPickupAt      DateTime?      @map("ready_for_pickup_at")
+  closedAt              DateTime?      @map("closed_at")
+  cancelledAt           DateTime?      @map("cancelled_at")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
 
   @@index([deviceId])
+  @@index([requesterId])
   @@index([technicianId])
+  @@index([triagedById])
+  @@index([issueCategory])
+  @@index([severity])
+  @@index([repairMethod])
   @@index([status])
   @@index([status, createdAt])
+  @@index([triagedAt])
+  @@index([assignedAt])
+  @@index([readyForPickupAt])
+  @@index([closedAt])
   @@index([createdAt])
   @@map("repair_tickets")
 }
@@ -119,6 +244,68 @@ model RepairLog {
   @@index([technicianId])
   @@index([createdAt])
   @@map("repair_logs")
+}
+
+model DeviceCustody {
+  id                   String        @id @default(cuid())
+  ticketId             String        @unique @map("ticket_id")
+  ticket               RepairTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  deviceId             String?       @map("device_id")
+  device               Device?       @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  status               CustodyStatus @default(NOT_RECEIVED)
+  receivedById         String?       @map("received_by_id")
+  receivedBy           User?         @relation("CustodyReceivedBy", fields: [receivedById], references: [id], onDelete: SetNull)
+  receivedAt           DateTime?     @map("received_at")
+  condition            String?
+  screenCondition      String?       @map("screen_condition")
+  keyboardCondition    String?       @map("keyboard_condition")
+  batteryCondition     String?       @map("battery_condition")
+  bodyCondition        String?       @map("body_condition")
+  accessories          Json?
+  storageLocation      String?       @map("storage_location")
+  checkInPhotoUrls     Json?         @map("check_in_photo_urls")
+  releasedById         String?       @map("released_by_id")
+  releasedBy           User?         @relation("CustodyReleasedBy", fields: [releasedById], references: [id], onDelete: SetNull)
+  readyForCollectionAt DateTime?     @map("ready_for_collection_at")
+  collectedByName      String?       @map("collected_by_name")
+  collectedByPhone     String?       @map("collected_by_phone")
+  collectedAt          DateTime?     @map("collected_at")
+  pickupCodeVerifiedAt DateTime?     @map("pickup_code_verified_at")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  @@index([deviceId])
+  @@index([status])
+  @@index([receivedById])
+  @@index([releasedById])
+  @@index([receivedAt])
+  @@index([readyForCollectionAt])
+  @@index([collectedAt])
+  @@index([createdAt])
+  @@map("device_custody")
+}
+
+model RepairEvent {
+  id          String          @id @default(cuid())
+  ticketId    String          @map("ticket_id")
+  ticket      RepairTicket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actorId     String?         @map("actor_id")
+  actor       User?           @relation("RepairEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole   UserRole?       @map("actor_role")
+  eventType   RepairEventType @map("event_type")
+  statusFrom  String?         @map("status_from")
+  statusTo    String?         @map("status_to")
+  custodyFrom CustodyStatus?  @map("custody_from")
+  custodyTo   CustodyStatus?  @map("custody_to")
+  note        String?
+  metadata    Json?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([ticketId])
+  @@index([actorId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("repair_events")
 }
 
 model TechnicianActivity {

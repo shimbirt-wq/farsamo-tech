@@ -16,6 +16,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     email: "student@example.invalid",
     passwordHash: "$2a$12$hash",
     role: "STUDENT",
+    isActive: true,
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -114,6 +115,23 @@ describe("loginUser", () => {
       ok: false,
       status: 401,
       message: "Invalid email or password.",
+    });
+  });
+
+  it("rejects inactive users before issuing a session", async () => {
+    const prisma = buildMockPrisma();
+    const passwordHash = await hashPassword("StrongPassword123!");
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(buildUser({ isActive: false, passwordHash }));
+
+    const result = await loginUser(prisma, {
+      email: "student@example.invalid",
+      password: "StrongPassword123!",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      status: 403,
+      message: "This account is inactive. Contact an administrator for access.",
     });
   });
 

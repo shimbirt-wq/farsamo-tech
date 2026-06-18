@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { NotificationList } from "@/app/profile/notification-list";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
@@ -35,25 +36,19 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
   if (!user) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-3xl items-center px-6 py-16">
-        <section className="w-full rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Profile access</p>
+      <main className="app-shell flex min-h-screen items-center justify-center px-4 py-10">
+        <section className="panel w-full max-w-3xl p-8">
+          <p className="eyebrow">Profile access</p>
           <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">Sign in to view your profile</h1>
           <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">
             This page shows the authenticated user profile only. Use the registration or login API first, then refresh
             this screen.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/auth/login"
-              className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            >
+            <Link href="/auth/login" className="btn-primary">
               Sign in
             </Link>
-            <Link
-              href="/auth/register"
-              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-            >
+            <Link href="/auth/register" className="btn-secondary">
               Create account
             </Link>
           </div>
@@ -70,63 +65,55 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const notificationsResult = await listCurrentUserNotifications(prisma, user, notificationQuery);
 
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
+    <AppShell
+      active="profile"
+      eyebrow="Profile"
+      title={user.fullName}
+      user={user}
+      actions={
+        <>
+          <Link href="/dashboard" className="btn-secondary">
+            Open dashboard
+          </Link>
+          <Link href="/devices" className="btn-primary">
+            My devices
+          </Link>
+        </>
+      }
+    >
+      <section className="panel p-6">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Profile</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{user.fullName}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+            <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
               Your account profile stays limited to safe public fields only. Password hashes and protected auth details
               are never returned here.
             </p>
             {user.role !== "ADMIN" ? (
-              <p className="mt-4 max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+              <p className="mt-4 max-w-2xl rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
                 {deniedMessage}
               </p>
             ) : null}
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link
-              href="/dashboard"
-              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-            >
-              Open dashboard
-            </Link>
-            <Link
-              href="/devices"
-              className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              My devices
-            </Link>
             {(user.role === "STUDENT" || user.role === "LECTURER") ? (
-              <Link
-                href="/repair-tickets"
-                className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href="/repair-tickets" className="btn-secondary">
                 Repair tickets
               </Link>
             ) : null}
             {user.role === "ADMIN" ? (
-              <Link
-                href="/admin/users"
-                className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href="/admin/users" className="btn-secondary">
                 Open admin users
               </Link>
             ) : null}
-            <Link
-              href="/api/users/me"
-              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-            >
+            <Link href="/api/users/me" className="btn-secondary">
               Open JSON
             </Link>
           </div>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {profileFields.map(({ key, label }) => (
-            <article key={key} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
+            <article key={key} className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
               <p className="mt-3 text-base font-medium text-[var(--foreground)]">
                 {user[key] ? String(user[key]) : "Not provided"}
@@ -136,77 +123,71 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="rounded-xl border border-[var(--border)] bg-white p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Created</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{formatDate(user.createdAt)}</p>
           </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="rounded-xl border border-[var(--border)] bg-white p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Updated</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{formatDate(user.updatedAt)}</p>
           </article>
         </div>
+      </section>
 
-        <div className="mt-10">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Notifications</p>
-              <h2 className="mt-3 text-2xl font-semibold text-[var(--foreground)]">Dashboard notification center</h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                You have {notificationsResult.unreadCount} unread notification{notificationsResult.unreadCount === 1 ? "" : "s"}.
-              </p>
-            </div>
-            <Link
-              href={`/api/notifications?page=${notificationsResult.pagination.page}&pageSize=${notificationsResult.pagination.pageSize}`}
-              className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-            >
-              Open notifications JSON
-            </Link>
-          </div>
-
-          <div className="mt-6">
-            {notificationsResult.notifications.length > 0 ? (
-              <NotificationList
-                notifications={notificationsResult.notifications.map((notification) => ({
-                  id: notification.id,
-                  title: notification.title,
-                  message: notification.message,
-                  status: notification.status,
-                  createdAt: notification.createdAt,
-                  readAt: notification.readAt,
-                }))}
-              />
-            ) : (
-              <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
-                <p className="text-sm text-[var(--muted)]">No notifications yet.</p>
-              </article>
-            )}
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--muted)]">
-            <p>
-              Page {notificationsResult.pagination.page} of {notificationsResult.pagination.totalPages} · {notificationsResult.pagination.totalItems} notifications
+      <section className="panel mt-6 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="eyebrow">Notifications</p>
+            <h2 className="mt-3 text-2xl font-semibold text-[var(--foreground)]">Dashboard notification center</h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+              You have {notificationsResult.unreadCount} unread notification{notificationsResult.unreadCount === 1 ? "" : "s"}.
             </p>
-            <div className="flex gap-3">
-              {notificationsResult.pagination.page > 1 ? (
-                <Link
-                  href={`/profile?page=${notificationsResult.pagination.page - 1}&pageSize=${notificationsResult.pagination.pageSize}`}
-                  className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-                >
-                  Previous
-                </Link>
-              ) : null}
-              {notificationsResult.pagination.page < notificationsResult.pagination.totalPages ? (
-                <Link
-                  href={`/profile?page=${notificationsResult.pagination.page + 1}&pageSize=${notificationsResult.pagination.pageSize}`}
-                  className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-                >
-                  Next
-                </Link>
-              ) : null}
-            </div>
+          </div>
+          <Link
+            href={`/api/notifications?page=${notificationsResult.pagination.page}&pageSize=${notificationsResult.pagination.pageSize}`}
+            className="btn-secondary"
+          >
+            Open notifications JSON
+          </Link>
+        </div>
+
+        <div className="mt-6">
+          {notificationsResult.notifications.length > 0 ? (
+            <NotificationList
+              notifications={notificationsResult.notifications.map((notification) => ({
+                id: notification.id,
+                title: notification.title,
+                message: notification.message,
+                status: notification.status,
+                createdAt: notification.createdAt,
+                readAt: notification.readAt,
+              }))}
+            />
+          ) : (
+            <article className="rounded-xl border border-[var(--border)] bg-white p-5">
+              <p className="text-sm text-[var(--muted)]">No notifications yet.</p>
+            </article>
+          )}
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--muted)]">
+          <p>
+            Page {notificationsResult.pagination.page} of {notificationsResult.pagination.totalPages} - {notificationsResult.pagination.totalItems} notifications
+          </p>
+          <div className="flex gap-3">
+            {notificationsResult.pagination.page > 1 ? (
+              <Link href={`/profile?page=${notificationsResult.pagination.page - 1}&pageSize=${notificationsResult.pagination.pageSize}`} className="btn-secondary">
+                Previous
+              </Link>
+            ) : null}
+            {notificationsResult.pagination.page < notificationsResult.pagination.totalPages ? (
+              <Link href={`/profile?page=${notificationsResult.pagination.page + 1}&pageSize=${notificationsResult.pagination.pageSize}`} className="btn-secondary">
+                Next
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

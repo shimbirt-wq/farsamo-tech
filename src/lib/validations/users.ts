@@ -16,6 +16,7 @@ export const userListQuerySchema = z.object({
 
 export const updateUserRoleSchema = z.object({
   role: z.nativeEnum(UserRole),
+  isActive: z.boolean().optional(),
 });
 
 export type UserListQuery = z.infer<typeof userListQuerySchema>;

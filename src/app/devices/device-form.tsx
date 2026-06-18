@@ -49,8 +49,8 @@ export function DeviceForm({ ownerId }: DeviceFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Register device</p>
+    <form onSubmit={handleSubmit} className="panel p-6">
+      <p className="eyebrow">Register device</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Device type
@@ -58,7 +58,7 @@ export function DeviceForm({ ownerId }: DeviceFormProps) {
             name="deviceType"
             required
             placeholder="Laptop"
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -67,7 +67,7 @@ export function DeviceForm({ ownerId }: DeviceFormProps) {
             name="brand"
             required
             placeholder="Lenovo"
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -76,7 +76,7 @@ export function DeviceForm({ ownerId }: DeviceFormProps) {
             name="model"
             required
             placeholder="ThinkPad T14"
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
@@ -84,7 +84,7 @@ export function DeviceForm({ ownerId }: DeviceFormProps) {
           <input
             name="serialNumber"
             placeholder="Optional"
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+            className="field-control"
           />
         </label>
       </div>
@@ -95,7 +95,7 @@ export function DeviceForm({ ownerId }: DeviceFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Saving..." : "Create device"}
         </button>

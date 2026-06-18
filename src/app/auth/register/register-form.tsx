@@ -57,33 +57,33 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Create account</p>
+    <form onSubmit={handleSubmit} className="panel p-8">
+      <p className="eyebrow">Create account</p>
       <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">Register a new user</h1>
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Full name
-          <input name="fullName" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input name="fullName" required className="field-control" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           University ID
-          <input name="universityId" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input name="universityId" required className="field-control" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Faculty
-          <input name="faculty" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input name="faculty" required className="field-control" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Department
-          <input name="department" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input name="department" required className="field-control" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Phone
-          <input name="phone" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input name="phone" required className="field-control" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Role
-          <select name="role" defaultValue="STUDENT" className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]">
+          <select name="role" defaultValue="STUDENT" className="field-control">
             <option value="STUDENT">STUDENT</option>
             <option value="LECTURER">LECTURER</option>
             <option value="TECHNICIAN">TECHNICIAN</option>
@@ -91,11 +91,11 @@ export function RegisterForm() {
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)] sm:col-span-2">
           Email
-          <input type="email" name="email" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input type="email" name="email" required className="field-control" />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)] sm:col-span-2">
           Password
-          <input type="password" name="password" required className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]" />
+          <input type="password" name="password" required className="field-control" />
         </label>
       </div>
 
@@ -105,13 +105,13 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Creating..." : "Create account"}
         </button>
         <Link
           href="/auth/login"
-          className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
+          className="btn-secondary"
         >
           Back to sign in
         </Link>

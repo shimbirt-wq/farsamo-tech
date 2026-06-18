@@ -69,6 +69,14 @@ export async function loginUser(prisma: PrismaClient, input: LoginInput): Promis
     };
   }
 
+  if (!user.isActive) {
+    return {
+      ok: false,
+      status: 403,
+      message: "This account is inactive. Contact an administrator for access.",
+    };
+  }
+
   const passwordIsValid = await verifyPassword(input.password, user.passwordHash);
 
   if (!passwordIsValid) {

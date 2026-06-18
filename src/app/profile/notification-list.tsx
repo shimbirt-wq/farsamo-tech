@@ -56,14 +56,14 @@ export function NotificationList({ notifications }: NotificationListProps) {
         const isRead = notification.status === "READ" || notification.readAt !== null;
 
         return (
-          <article key={notification.id} className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article key={notification.id} className="rounded-xl border border-[var(--border)] bg-white p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-[var(--foreground)]">{notification.title}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{notification.message}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <span className="rounded-full border border-[var(--border-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground)]">
+                <span className={`status-badge ${isRead ? "status-ready" : "status-received"}`}>
                   {isRead ? "Read" : "Unread"}
                 </span>
                 {!isRead ? (
@@ -71,7 +71,7 @@ export function NotificationList({ notifications }: NotificationListProps) {
                     type="button"
                     onClick={() => handleMarkRead(notification.id)}
                     disabled={isPending && pendingId === notification.id}
-                    className="rounded-full bg-[var(--accent)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="btn-primary px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isPending && pendingId === notification.id ? "Saving..." : "Mark as read"}
                   </button>

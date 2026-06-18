@@ -25,5 +25,11 @@ export async function getCurrentServerUser() {
     return null;
   }
 
-  return getUserById(prisma, session.id);
+  const user = await getUserById(prisma, session.id);
+
+  if (!user?.isActive) {
+    return null;
+  }
+
+  return user;
 }

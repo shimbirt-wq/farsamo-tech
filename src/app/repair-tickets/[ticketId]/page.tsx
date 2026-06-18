@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { AppShell } from "@/app/app-shell";
 import { notFound, redirect } from "next/navigation";
 import { getNextRepairStatus, REPAIR_STATUS_LABELS } from "@/lib/constants/repair-status";
 import { RepairLogForm } from "@/app/repair-tickets/repair-log-form";
@@ -10,6 +11,7 @@ import { prisma } from "@/lib/db/prisma";
 import { buildTicketQrCodeUrl, buildTicketLookupUrl } from "@/lib/lookup/ticket-lookup-service";
 import { getRepairTicketDetail } from "@/lib/repair-tickets/repair-ticket-service";
 import { listAssignableTechnicians } from "@/lib/users/user-service";
+import { StatusBadge } from "@/app/repair-tickets/status-badge";
 
 type RepairTicketDetailPageProps = {
   params: Promise<{
@@ -47,46 +49,46 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
   const qrCodeUrl = buildTicketQrCodeUrl(ticket.ticketId);
 
   return (
-    <main className="mx-auto min-h-screen max-w-5xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Repair ticket</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{ticket.ticketId}</h1>
-            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{ticket.issueDescription}</p>
-          </div>
-          <Link
-            href="/repair-tickets"
-            className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-          >
+    <AppShell
+      active="tickets"
+      eyebrow="Repair ticket"
+      title={ticket.ticketId}
+      user={user}
+      actions={
+        <Link href="/repair-tickets" className="btn-secondary">
             Back to tickets
-          </Link>
-        </div>
+        </Link>
+      }
+    >
+      <section className="panel p-6">
+        <p className="max-w-3xl text-sm leading-7 text-[var(--muted)]">{ticket.issueDescription}</p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="panel p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Status</p>
-            <p className="mt-3 text-base font-medium text-[var(--foreground)]">{REPAIR_STATUS_LABELS[ticket.status]}</p>
+            <div className="mt-3">
+              <StatusBadge status={ticket.status} />
+            </div>
           </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="panel p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Device</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">
               {ticket.device.brand} {ticket.device.model}
             </p>
           </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="panel p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Owner</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.device.owner.fullName}</p>
           </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="panel p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Assigned technician</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.technician?.fullName ?? "Not assigned"}</p>
           </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="panel p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Photo URL</p>
             <p className="mt-3 text-base font-medium text-[var(--foreground)]">{ticket.photoUrl ?? "Not provided"}</p>
           </article>
-          <article className="rounded-2xl border border-[var(--border)] bg-white p-5">
+          <article className="panel p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">QR lookup</p>
             <Image src={qrCodeUrl} alt={`QR code for ${ticket.ticketId}`} width={112} height={112} className="mt-3 h-28 w-28" />
             <Link href={lookupUrl} className="mt-3 inline-flex text-sm font-semibold text-[var(--accent)]">
@@ -130,9 +132,9 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
           <h2 className="text-xl font-semibold text-[var(--foreground)]">Timeline</h2>
           <div className="mt-4 grid gap-4">
             {ticket.logs.map((log) => (
-              <article key={log.id} className="rounded-2xl border border-[var(--border)] bg-white p-5">
+              <article key={log.id} className="panel p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-[var(--foreground)]">{REPAIR_STATUS_LABELS[log.status]}</p>
+                  <StatusBadge status={log.status} />
                   <p className="text-sm text-[var(--muted)]">{new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(log.createdAt)}</p>
                 </div>
                 {log.technician ? (
@@ -145,6 +147,6 @@ export default async function RepairTicketDetailPage({ params }: RepairTicketDet
           </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

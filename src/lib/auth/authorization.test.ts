@@ -24,6 +24,7 @@ function buildPublicUser(overrides: Partial<PublicUser> = {}): PublicUser {
     phone: "+252610001111",
     email: "student@example.invalid",
     role: "STUDENT",
+    isActive: true,
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -118,6 +119,19 @@ describe("requireAuthenticatedUser", () => {
     const { prisma, userFindUnique } = buildMockPrisma();
     userFindUnique.mockResolvedValue(null);
     const token = await signSessionToken({ id: "missing_user", role: "STUDENT" });
+
+    const result = await requireAuthenticatedUser(prisma, buildRequestWithSession(token));
+
+    expect(result).toEqual(AUTHORIZATION_ERRORS.unauthenticated);
+    vi.unstubAllEnvs();
+  });
+
+  it("rejects valid tokens for inactive users", async () => {
+    vi.stubEnv("JWT_SECRET", "test-secret-value-that-is-long-enough");
+    const { prisma, userFindUnique } = buildMockPrisma();
+    const user = buildPublicUser({ isActive: false });
+    userFindUnique.mockResolvedValue(user);
+    const token = await signSessionToken({ id: user.id, role: user.role });
 
     const result = await requireAuthenticatedUser(prisma, buildRequestWithSession(token));
 

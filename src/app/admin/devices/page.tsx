@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { redirect } from "next/navigation";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
@@ -35,54 +36,40 @@ export default async function AdminDevicesPage({ searchParams }: AdminDevicesPag
   const result = await listDevices(prisma, user, query);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Admin devices</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">Device lookup</h1>
-          </div>
-          <Link
-            href="/devices"
-            className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-          >
-            My devices
-          </Link>
-        </div>
-
-        <form className="mt-8 flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 sm:flex-row">
+    <AppShell
+      active="devices"
+      eyebrow="Admin devices"
+      title="Device lookup"
+      user={user}
+      actions={
+        <Link href="/devices" className="btn-secondary">
+          My devices
+        </Link>
+      }
+    >
+      <section className="panel p-6">
+        <form className="flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 sm:flex-row">
           <input
             type="search"
             name="query"
             defaultValue={query.query ?? ""}
             placeholder="Search by owner, brand, model, or serial number"
-            className="min-w-0 flex-1 rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+            className="field-control min-w-0 flex-1"
           />
           <input type="hidden" name="pageSize" value={String(query.pageSize)} />
-          <button
-            type="submit"
-            className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          >
+          <button type="submit" className="btn-primary">
             Search
           </button>
         </form>
 
-        <div className="mt-8 overflow-hidden rounded-3xl border border-[var(--border)]">
+        <div className="mt-8 overflow-hidden rounded-xl border border-[var(--border)]">
           <table className="min-w-full border-collapse bg-white">
             <thead className="bg-[var(--surface-alt)]">
               <tr>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Device
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Owner
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Serial
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Action
-                </th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Device</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Owner</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Serial</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -98,10 +85,7 @@ export default async function AdminDevicesPage({ searchParams }: AdminDevicesPag
                   </td>
                   <td className="px-4 py-4 text-sm text-[var(--foreground)]">{device.serialNumber ?? "Not provided"}</td>
                   <td className="px-4 py-4">
-                    <Link
-                      href={`/devices/${device.id}`}
-                      className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-                    >
+                    <Link href={`/devices/${device.id}`} className="btn-secondary">
                       Open device
                     </Link>
                   </td>
@@ -113,28 +97,22 @@ export default async function AdminDevicesPage({ searchParams }: AdminDevicesPag
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--muted)]">
           <p>
-            Page {result.pagination.page} of {result.pagination.totalPages} · {result.pagination.totalItems} devices
+            Page {result.pagination.page} of {result.pagination.totalPages} - {result.pagination.totalItems} devices
           </p>
           <div className="flex gap-3">
             {result.pagination.page > 1 ? (
-              <Link
-                href={`/admin/devices?page=${result.pagination.page - 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(query.query ?? "")}`}
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href={`/admin/devices?page=${result.pagination.page - 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(query.query ?? "")}`} className="btn-secondary">
                 Previous
               </Link>
             ) : null}
             {result.pagination.page < result.pagination.totalPages ? (
-              <Link
-                href={`/admin/devices?page=${result.pagination.page + 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(query.query ?? "")}`}
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href={`/admin/devices?page=${result.pagination.page + 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(query.query ?? "")}`} className="btn-secondary">
                 Next
               </Link>
             ) : null}
           </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

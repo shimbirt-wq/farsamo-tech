@@ -22,8 +22,8 @@ describe("buildLocalSeedData", () => {
     const data = buildLocalSeedData("hashed-password");
     const roles = data.users.map((user) => user.role);
 
-    expect(roles).toEqual(expect.arrayContaining(["ADMIN", "TECHNICIAN", "STUDENT", "LECTURER"]));
-    expect(data.users).toHaveLength(4);
+    expect(roles).toEqual(expect.arrayContaining(["ADMIN", "LEAD_TECHNICIAN", "TECHNICIAN", "STUDENT", "LECTURER"]));
+    expect(data.users).toHaveLength(5);
   });
 
   it("uses non-routable example emails and test university ids", () => {

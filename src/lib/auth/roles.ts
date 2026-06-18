@@ -4,6 +4,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   STUDENT: "Student",
   LECTURER: "Lecturer",
   TECHNICIAN: "Technician",
+  LEAD_TECHNICIAN: "Lead Technician",
   ADMIN: "Admin",
 };
 

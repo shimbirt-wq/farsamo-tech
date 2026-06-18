@@ -44,20 +44,20 @@ export function StatusUpdateForm({ currentStatus, nextStatus, nextStatusLabel, t
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="panel p-6">
       <div className="flex flex-wrap items-end gap-4">
         <label className="flex min-w-[260px] flex-1 flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
           Next repair journey step
           <input
             value={nextStatusLabel}
             readOnly
-            className="rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none"
+            className="field-control"
           />
         </label>
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Updating..." : "Advance status"}
         </button>

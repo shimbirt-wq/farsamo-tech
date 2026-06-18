@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppShell } from "@/app/app-shell";
 import { redirect } from "next/navigation";
 import { getCurrentServerUser } from "@/lib/auth/server-user";
 import { prisma } from "@/lib/db/prisma";
@@ -34,58 +35,45 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const result = await listUsers(prisma, parsedQuery);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
-      <section className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Admin users</p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">User management</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-              Search by name, email, or university ID, then open a user record to review safe public fields and update
-              roles.
-            </p>
-          </div>
-          <Link
-            href="/api/users"
-            className="rounded-full border border-[var(--border-strong)] px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-          >
-            JSON endpoint
-          </Link>
-        </div>
+    <AppShell
+      active="users"
+      eyebrow="Admin users"
+      title="User management"
+      user={currentUser}
+      actions={
+        <Link href="/api/users" className="btn-secondary">
+          JSON endpoint
+        </Link>
+      }
+    >
+      <section className="panel p-6">
+        <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
+          Search by name, email, or university ID, then open a user record to review safe public fields and update roles.
+        </p>
 
-        <form className="mt-8 flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 sm:flex-row">
+        <form className="mt-6 flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 sm:flex-row">
           <input
             type="search"
             name="query"
             defaultValue={parsedQuery.query ?? ""}
             placeholder="Search by name, email, or university ID"
-            className="min-w-0 flex-1 rounded-2xl border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+            className="field-control min-w-0 flex-1"
           />
           <input type="hidden" name="pageSize" value={String(parsedQuery.pageSize)} />
-          <button
-            type="submit"
-            className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          >
+          <button type="submit" className="btn-primary">
             Search
           </button>
         </form>
 
-        <div className="mt-8 overflow-hidden rounded-3xl border border-[var(--border)]">
+        <div className="mt-8 overflow-hidden rounded-xl border border-[var(--border)]">
           <table className="min-w-full border-collapse bg-white">
             <thead className="bg-[var(--surface-alt)]">
               <tr>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  User
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Role
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  University ID
-                </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Action
-                </th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">User</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Role</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Status</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">University ID</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -95,13 +83,17 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                     <p className="text-sm font-semibold text-[var(--foreground)]">{user.fullName}</p>
                     <p className="mt-1 text-sm text-[var(--muted)]">{user.email}</p>
                   </td>
-                  <td className="px-4 py-4 text-sm text-[var(--foreground)]">{user.role}</td>
+                  <td className="px-4 py-4">
+                    <span className="status-badge status-received">{user.role}</span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className={`status-badge ${user.isActive ? "status-ready" : "status-registration"}`}>
+                      {user.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </td>
                   <td className="px-4 py-4 text-sm text-[var(--foreground)]">{user.universityId ?? "Not provided"}</td>
                   <td className="px-4 py-4">
-                    <Link
-                      href={`/admin/users/${user.id}`}
-                      className="rounded-full border border-[var(--border-strong)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-                    >
+                    <Link href={`/admin/users/${user.id}`} className="btn-secondary">
                       Open user
                     </Link>
                   </td>
@@ -113,28 +105,22 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--muted)]">
           <p>
-            Page {result.pagination.page} of {result.pagination.totalPages} · {result.pagination.totalItems} users
+            Page {result.pagination.page} of {result.pagination.totalPages} - {result.pagination.totalItems} users
           </p>
           <div className="flex gap-3">
             {result.pagination.page > 1 ? (
-              <Link
-                href={`/admin/users?page=${result.pagination.page - 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(parsedQuery.query ?? "")}`}
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href={`/admin/users?page=${result.pagination.page - 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(parsedQuery.query ?? "")}`} className="btn-secondary">
                 Previous
               </Link>
             ) : null}
             {result.pagination.page < result.pagination.totalPages ? (
-              <Link
-                href={`/admin/users?page=${result.pagination.page + 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(parsedQuery.query ?? "")}`}
-                className="rounded-full border border-[var(--border-strong)] px-4 py-2 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-alt)]"
-              >
+              <Link href={`/admin/users?page=${result.pagination.page + 1}&pageSize=${result.pagination.pageSize}&query=${encodeURIComponent(parsedQuery.query ?? "")}`} className="btn-secondary">
                 Next
               </Link>
             ) : null}
           </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }
