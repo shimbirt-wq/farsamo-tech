@@ -14,7 +14,14 @@ const repairRows = [
   { ticket: "#R-12455", device: "MacBook Air M1", issue: "Wi-Fi not connecting", status: "In Progress", priority: "Medium" }
 ] as const;
 
-const sidebarItems = ["Dashboard", "Users", "Devices", "Repair tickets", "Admin users", "API health"] as const;
+const sidebarItems = [
+  { label: "Dashboard", icon: DashboardIcon },
+  { label: "Users", icon: UsersSidebarIcon },
+  { label: "Devices", icon: DevicesSidebarIcon },
+  { label: "Repair tickets", icon: TicketsSidebarIcon },
+  { label: "Admin users", icon: AdminUsersSidebarIcon },
+  { label: "API health", icon: ApiHealthSidebarIcon }
+] as const;
 
 const highlights = [
   { label: "Secure Platform", icon: ShieldIcon },
@@ -98,6 +105,96 @@ function DateIcon() {
   );
 }
 
+function DashboardIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="M4 10.5 12 4l8 6.5V20H4v-9.5ZM9 20v-5h6v5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function UsersSidebarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="M16.5 19.5v-1.2a3.3 3.3 0 0 0-3.3-3.3H8.8a3.3 3.3 0 0 0-3.3 3.3v1.2M11 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM20 19.5v-1.2a3.3 3.3 0 0 0-2.4-3.2M15.8 5.2a3 3 0 0 1 0 5.7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function DevicesSidebarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="M8 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm3 14h2"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function TicketsSidebarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="M7 4h7l5 5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 6 19V5.5A1.5 1.5 0 0 1 7.5 4H7Zm7 0v5h5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function AdminUsersSidebarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="M16.5 19.5v-1.2a3.3 3.3 0 0 0-3.3-3.3H8.8a3.3 3.3 0 0 0-3.3 3.3v1.2M11 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM18.5 8.5l.9 1.8 2 .3-1.45 1.42.34 2-1.79-.94-1.79.94.34-2-1.45-1.42 2-.3.9-1.8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function ApiHealthSidebarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path
+        d="m12 21-7-4V7l7-4 7 4v10l-7 4ZM8 12h2l1-2 2 4 1-2h2"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
 function TrendIcon({ accent }: { accent: "teal" | "amber" | "violet" }) {
   const styles = {
     teal: "bg-teal-50 text-teal-500",
@@ -149,17 +246,27 @@ function DashboardPreview() {
           </div>
 
           <nav className="mt-7 space-y-2">
-            {sidebarItems.map((item, index) => (
+            {sidebarItems.map((item, index) => {
+              const Icon = item.icon;
+
+              return (
               <div
-                key={item}
+                key={item.label}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-[14px] font-medium ${
                   index === 0 ? "bg-[#ECFDF5] text-[#0F766E]" : "text-slate-600"
                 }`}
               >
-                <span className="h-2 w-2 rounded-full bg-current opacity-80" />
-                <span>{item}</span>
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                    index === 0 ? "bg-[#DDFBF3] text-[#0F766E]" : "bg-[#F8FAFC] text-[#64748B]"
+                  }`}
+                >
+                  <Icon />
+                </span>
+                <span>{item.label}</span>
               </div>
-            ))}
+              );
+            })}
           </nav>
         </aside>
 
