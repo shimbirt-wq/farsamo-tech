@@ -51,7 +51,7 @@ export function LandingNavbar() {
             <ThemeToggle />
             <Link
               href="/auth/login"
-              className="inline-flex h-11 items-center justify-center gap-3 rounded-[14px] border border-[#173B6B] bg-[#0F2D57] px-5 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(15,45,87,0.18)] transition duration-200 hover:bg-[#13386b] dark:border-[#173B6B] dark:bg-[#0F2D57] dark:text-white dark:hover:bg-[#13386b]"
+              className="inline-flex h-11 items-center justify-center gap-3 rounded-[14px] border border-[#173B6B] bg-[#0F2D57] px-5 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(15,45,87,0.18)] transition duration-200 hover:bg-[#13386b] dark:border-white dark:bg-white dark:text-black dark:hover:bg-slate-100"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
                 <path
