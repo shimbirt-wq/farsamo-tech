@@ -1,10 +1,8 @@
 import Link from "next/link";
 
 const quickLinks = [
-  { href: "/", label: "Home" },
-  { href: "/devices", label: "Services" },
-  { href: "/repair-tickets", label: "My Requests" },
-  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/#home", label: "Home" },
+  { href: "/#services", label: "Services" },
   { href: "/#about-us", label: "About Us" }
 ] as const;
 
@@ -136,7 +134,7 @@ export function LandingFooter() {
         </div>
 
         <div className="mt-14 border-t border-white/10 pt-6 text-center text-[16px] text-[#C8D6E5]">
-          © 2026 Fixora. All rights reserved.
+          © 2026 FarsamoTech. All rights reserved.
         </div>
       </div>
     </footer>
