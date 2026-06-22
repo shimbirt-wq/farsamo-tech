@@ -3,7 +3,7 @@ const stats = [
     value: "3,200 +",
     label: "Happy Students",
     icon: StudentsIcon,
-    badgeClass: "bg-teal-50 text-teal-500 dark:bg-teal-500/15 dark:text-teal-300"
+    badgeClass: "bg-blue-50 text-[#1D4ED8] dark:bg-blue-500/15 dark:text-[#93C5FD]"
   },
   {
     value: "5,800 +",

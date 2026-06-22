@@ -3,8 +3,8 @@ const steps = [
     number: "01",
     title: "Describe the issue",
     description: "Tell us what's wrong and add details.",
-    accentClass: "text-teal-500 dark:text-teal-300",
-    badgeClass: "bg-teal-50 text-teal-500 dark:bg-teal-500/15 dark:text-teal-300",
+    accentClass: "text-blue-600 dark:text-blue-400",
+    badgeClass: "bg-blue-50 text-[#1D4ED8] dark:bg-blue-500/15 dark:text-[#93C5FD]",
     icon: DescribeIcon
   },
   {
@@ -125,7 +125,7 @@ export function LandingHowItWorksSection() {
     >
       <div className="mx-auto max-w-[1400px]">
         <div className="text-center">
-          <p className="text-[15px] font-bold uppercase tracking-[0.18em] text-teal-500 dark:text-teal-300">
+          <p className="text-[15px] font-bold uppercase tracking-[0.18em] text-[#1D4ED8] dark:text-[#93C5FD]">
             Get Help In 4 Easy Steps
           </p>
           <h2 className="mt-3 text-[40px] font-extrabold tracking-[-0.04em] text-slate-900 dark:text-white sm:text-[48px]">

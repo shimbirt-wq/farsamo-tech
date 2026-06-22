@@ -3,8 +3,26 @@
 import Link from "next/link";
 
 const teamMembers = [
+
   {
-    name: "Engineer Ruweydo",
+    name: "Eng. Muscab Abdirashid",
+    role: "Team Lead Engineer",
+    image: "/images/hero/Muscab.jpeg",
+    imagePosition: "center top",
+    accent: "bg-[#475569]",
+    glow: "bg-[rgba(71,85,105,0.14)]"
+  },
+  {
+    name: "Eng. Ishak Abdiaziz",
+    role: "Full-stack software engineer",
+    image: "/images/hero/Ishak%20Image%20.jpg",
+    imagePosition: "center 20%",
+    accent: "bg-[#3B82F6]",
+    glow: "bg-[rgba(59,130,246,0.16)]"
+  },
+
+  {
+    name: "Eng. Ruweydo Hassan",
     role: "Software developer",
     image: "/images/hero/Ruweydo.jpeg",
     imagePosition: "center 20%",
@@ -12,24 +30,8 @@ const teamMembers = [
     glow: "bg-[rgba(139,92,246,0.16)]"
   },
   {
-    name: "Engineer Ishak",
-    role: "Full-stack software engineer",
-    image: "/images/hero/Ishak%20Image%20.jpg",
-    imagePosition: "center 20%",
-    accent: "bg-[#14B8A6]",
-    glow: "bg-[rgba(20,184,166,0.16)]"
-  },
-  {
-    name: "Engineer Muscab",
-    role: "UI/UX Designer",
-    image: "/images/hero/Muscab.jpeg",
-    imagePosition: "center top",
-    accent: "bg-[#475569]",
-    glow: "bg-[rgba(71,85,105,0.14)]"
-  },
-  {
-    name: "Engineer Abdirahman",
-    role: "Full-stack software engineer",
+    name: "Eng. Abdulsalam Hassan ",
+    role: "Backend & AI Engineer",
     image: "/images/hero/Abdisalaam%20.jpeg",
     imagePosition: "center top",
     accent: "bg-[rgb(180,140,70)]",
@@ -42,7 +44,7 @@ const benefits = [
     title: "Lightning Fast",
     description: "Quick response and faster resolutions for all requests.",
     icon: BoltIcon,
-    iconClass: "bg-teal-50 text-teal-500 dark:bg-teal-500/15 dark:text-teal-300"
+    iconClass: "bg-blue-50 text-[#1D4ED8] dark:bg-blue-500/15 dark:text-blue-300"
   },
   {
     title: "Secure & Private",
@@ -165,7 +167,7 @@ export function LandingHero() {
     >
       <div className="mx-auto min-h-[720px] max-w-[1400px]">
         <div className="mx-auto flex max-w-[760px] flex-col items-center text-center">
-          <span className="inline-flex h-11 items-center gap-2 rounded-full border border-teal-100 bg-[#F0FDFA] px-5 text-sm font-semibold text-[#0F766E] shadow-[0_10px_30px_rgba(20,184,166,0.08)] dark:border-teal-900/60 dark:bg-teal-950/40 dark:text-[#5EEAD4]">
+          <span className="inline-flex h-11 items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-5 text-sm font-semibold text-[#1D4ED8] shadow-[0_10px_30px_rgba(29,78,216,0.08)] dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-[#93C5FD]">
             <BadgeIcon />
             Smarter Repairs. Better Experience.
           </span>
@@ -173,7 +175,7 @@ export function LandingHero() {
           <h1 className="mt-7 text-[42px] font-extrabold leading-[1.08] tracking-[-0.05em] text-[#0F172A] dark:text-[#F8FAFC] sm:text-[54px] lg:text-[64px]">
             Reliable IT support,
             <span className="block">
-              right <span className="text-[#0F766E]">when you need it.</span>
+              right <span className="text-[#1D4ED8]">when you need it.</span>
             </span>
           </h1>
 
@@ -184,14 +186,14 @@ export function LandingHero() {
           <div id="requests" className="scroll-mt-[100px] mt-9 flex flex-col items-center gap-4 sm:flex-row">
             <Link
               href="/request-repair"
-              className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-[#0F766E] px-7 text-[16px] font-semibold text-white shadow-[0_18px_45px_rgba(15,118,110,0.24)] transition duration-200 hover:bg-[#115E59]"
+              className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-[#1D4ED8] px-7 text-[16px] font-semibold text-white shadow-[0_18px_45px_rgba(29,78,216,0.24)] transition duration-200 hover:bg-[#1E40AF]"
             >
               <PlusIcon />
               Submit a Request
             </Link>
             <Link
               href="/track"
-              className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl border border-teal-200 bg-white px-7 text-[16px] font-semibold text-[#0F766E] transition duration-200 hover:border-teal-300 hover:bg-[#F8FFFD] dark:border-teal-900/60 dark:bg-transparent dark:text-[#5EEAD4] dark:hover:bg-teal-950/30"
+              className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl border border-blue-200 bg-white px-7 text-[16px] font-semibold text-[#1D4ED8] transition duration-200 hover:border-blue-300 hover:bg-blue-50/50 dark:border-blue-900/60 dark:bg-transparent dark:text-[#93C5FD] dark:hover:bg-blue-950/30"
             >
               <SearchIcon />
               Track Your Request
@@ -204,7 +206,7 @@ export function LandingHero() {
           className="mx-auto mb-7 mt-[96px] flex max-w-[760px] scroll-mt-[100px] flex-col items-center text-center"
         >
           <h2 className="text-[28px] font-extrabold leading-[1.25] text-[#0F172A] dark:text-[#F8FAFC]">
-            Meet the <span className="text-[#0F766E]">dedicated team</span> behind your smooth IT support
+            Meet the <span className="text-[#1D4ED8]">dedicated team</span> behind your smooth IT support
             experience.
           </h2>
           <p className="mt-3 max-w-[640px] text-[16px] leading-[1.6] text-[#64748B] dark:text-[#CBD5E1]">
@@ -214,7 +216,7 @@ export function LandingHero() {
         </div>
 
         <div className="relative mt-12 flex justify-center">
-          <div className="pointer-events-none absolute inset-x-[14%] top-4 h-[320px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(20,184,166,0.08),_rgba(255,255,255,0)_72%)]" />
+          <div className="pointer-events-none absolute inset-x-[14%] top-4 h-[320px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(29,78,216,0.08),_rgba(255,255,255,0)_72%)]" />
           <div className="relative flex w-full max-w-[1440px] flex-col items-center gap-8 px-4 sm:grid sm:grid-cols-2 sm:justify-items-center sm:gap-x-8 sm:gap-y-10 lg:flex lg:flex-row lg:items-end lg:justify-center lg:gap-6 lg:px-0">
             {teamMembers.map((member, index) => {
               const cardLayout = [
@@ -260,31 +262,31 @@ export function LandingHero() {
 
         <div className="mx-auto mt-20 max-w-[1180px] rounded-[30px] bg-white px-6 py-8 shadow-[0_20px_50px_rgba(15,23,42,0.06)] dark:bg-[#020617] sm:px-8 lg:px-10">
           <div className="grid gap-8 md:grid-cols-3 md:gap-0">
-          {benefits.map((benefit) => {
-            const Icon = benefit.icon;
+            {benefits.map((benefit) => {
+              const Icon = benefit.icon;
 
-            return (
-              <article
-                key={benefit.title}
-                className="relative flex items-start gap-4 px-2 py-2 md:px-6 lg:px-8"
-              >
-                <span
-                  className={`flex h-16 w-16 flex-none items-center justify-center rounded-[20px] ${benefit.iconClass}`}
+              return (
+                <article
+                  key={benefit.title}
+                  className="relative flex items-start gap-4 px-2 py-2 md:px-6 lg:px-8"
                 >
-                  <Icon />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="text-[24px] font-bold tracking-[-0.03em] text-[#0F172A] dark:text-[#F8FAFC]">
-                    {benefit.title}
-                  </h3>
-                  <p className="mt-2 text-[16px] leading-8 text-[#64748B] dark:text-[#CBD5E1]">
-                    {benefit.description}
-                  </p>
-                </div>
-                <span className="absolute right-0 top-1/2 hidden h-[72px] w-px -translate-y-1/2 bg-[#EAEFF3] md:block last:hidden dark:bg-[#1E293B]" />
-              </article>
-            );
-          })}
+                  <span
+                    className={`flex h-16 w-16 flex-none items-center justify-center rounded-[20px] ${benefit.iconClass}`}
+                  >
+                    <Icon />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-[24px] font-bold tracking-[-0.03em] text-[#0F172A] dark:text-[#F8FAFC]">
+                      {benefit.title}
+                    </h3>
+                    <p className="mt-2 text-[16px] leading-8 text-[#64748B] dark:text-[#CBD5E1]">
+                      {benefit.description}
+                    </p>
+                  </div>
+                  <span className="absolute right-0 top-1/2 hidden h-[72px] w-px -translate-y-1/2 bg-[#EAEFF3] md:block last:hidden dark:bg-[#1E293B]" />
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>

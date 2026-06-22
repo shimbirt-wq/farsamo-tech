@@ -110,7 +110,7 @@ function CodeIcon() {
 
 export function LandingFeaturesSection() {
   const accentClasses = {
-    teal: "bg-teal-50 text-[#0F766E]",
+    teal: "bg-blue-50 text-[#1D4ED8]",
     blue: "bg-sky-50 text-sky-600",
     orange: "bg-orange-50 text-orange-500",
     violet: "bg-violet-50 text-violet-600",

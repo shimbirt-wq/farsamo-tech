@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Logo } from "@/components/landing/logo";
+import { SimadRepairLogo } from "@/components/brand/simad-repair-logo";
 
 type NavigationItem = {
   href: string;
@@ -32,7 +32,7 @@ export function MobileMenu({ items, isOpen, onClose }: MobileMenuProps) {
         }`}
       >
         <div className="flex items-center justify-between gap-3">
-          <Logo compact />
+          <SimadRepairLogo className="h-9 w-auto" />
           <button
             type="button"
             onClick={onClose}
@@ -57,7 +57,7 @@ export function MobileMenu({ items, isOpen, onClose }: MobileMenuProps) {
               key={item.href}
               href={item.href}
               onClick={onClose}
-              className="px-2 py-3 text-base font-semibold text-[#0F172A] transition duration-200 hover:text-[#0F766E]"
+              className="px-2 py-3 text-base font-semibold text-[#0F172A] transition duration-200 hover:text-[#1D4ED8]"
             >
               {item.label}
             </Link>
@@ -69,7 +69,7 @@ export function MobileMenu({ items, isOpen, onClose }: MobileMenuProps) {
             <Link
               href="/auth/login"
               onClick={onClose}
-              className="inline-flex items-center justify-center rounded-xl bg-[#0F172A] px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-[#0b1324]"
+              className="inline-flex items-center justify-center rounded-xl bg-[#1D4ED8] px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-[#1E40AF]"
             >
               Sign in
             </Link>

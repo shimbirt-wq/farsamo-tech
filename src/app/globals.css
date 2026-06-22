@@ -115,8 +115,8 @@
   --border-strong: #334155;
   --surface: rgba(15, 23, 42, 0.9);
   --surface-alt: #0f172a;
-  --accent: #14b8a6;
-  --accent-strong: #5eead4;
+  --accent: #1d4ed8;
+  --accent-strong: #93c5fd;
 }
 
 *, *::before, *::after {

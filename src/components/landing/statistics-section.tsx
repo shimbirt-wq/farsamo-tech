@@ -88,7 +88,7 @@ function ShieldIcon() {
 
 export function LandingStatisticsSection() {
   const accentClasses = {
-    teal: "bg-teal-100/80 text-[#0F766E]",
+    teal: "bg-blue-100/80 text-[#1D4ED8]",
     blue: "bg-sky-100/80 text-sky-600",
     orange: "bg-orange-100/80 text-orange-500",
     violet: "bg-violet-100/80 text-violet-600"

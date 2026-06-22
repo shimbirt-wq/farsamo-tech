@@ -13,7 +13,7 @@ export function Logo({ compact = false }: LogoProps) {
       aria-label="Farsamotech home"
       className="group inline-flex items-center gap-3 transition-colors duration-200"
     >
-      <span className="flex h-12 w-12 items-center justify-center text-[#00796B] transition-transform duration-200 group-hover:scale-105">
+      <span className="flex h-12 w-12 items-center justify-center text-[#0F766E] transition-transform duration-200 group-hover:scale-105">
         <svg viewBox="0 0 64 64" aria-hidden="true" className="h-12 w-12">
           <path
             d="M32 4.5 50 14.9v20.7L32 46 14 35.6V14.9L32 4.5Z"
@@ -43,9 +43,9 @@ export function Logo({ compact = false }: LogoProps) {
       <span className={`${compact ? "hidden sm:flex" : "flex"} flex-col leading-none`}>
         <span className="text-[23px] font-extrabold tracking-[-0.04em]">
           <span className="text-[#0F172A] dark:text-white">Farsamo</span>
-          <span className="text-[#00796B] dark:text-[#14B8A6]">Tech</span>
+          <span className="text-[#0F766E] dark:text-[#14B8A6]">Tech</span>
         </span>
-        <span className="mt-1 text-[11px] font-medium tracking-[0.01em] text-[#00796B]/85">
+        <span className="mt-1 text-[11px] font-medium tracking-[0.01em] text-[#0F766E]/85">
           Smart Solving. Better Future.
         </span>
       </span>

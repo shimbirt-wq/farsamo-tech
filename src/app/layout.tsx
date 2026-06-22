@@ -3,7 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FarsamoTech Repair Hub",
+  title: "SIMADRepair IT Service Desk",
   description: "Computer repair and maintenance management for SIMAD University.",
 };
 

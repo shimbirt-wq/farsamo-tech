@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { Logo } from "@/components/landing/logo";
+import { SimadRepairLogo } from "@/components/brand/simad-repair-logo";
 import { MobileMenu } from "@/components/landing/mobile-menu";
 import { ThemeToggle } from "@/components/landing/theme-toggle";
 
@@ -29,7 +29,7 @@ export function LandingNavbar() {
       <header className="fixed inset-x-0 top-0 z-30 h-20 border-b border-[#EAEFF3] bg-white transition-colors duration-300 dark:border-[#1E293B] dark:bg-[#0F172A]">
         <div className="mx-auto grid h-full w-full max-w-[1680px] grid-cols-[1fr_auto] items-center px-4 sm:px-8 lg:grid-cols-[280px_1fr_280px] lg:px-12">
           <div className="flex min-w-0 justify-start lg:w-[280px] lg:justify-self-start">
-            <Logo />
+            <SimadRepairLogo className="h-10 w-auto" />
           </div>
 
           <nav className="hidden items-center justify-center gap-[44px] lg:flex lg:justify-self-center">
@@ -37,7 +37,7 @@ export function LandingNavbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-[16px] font-semibold text-[#0F172A] transition-colors duration-200 hover:text-[#0F766E] dark:text-[#F8FAFC] dark:hover:text-[#5EEAD4]"
+                className="text-[16px] font-semibold text-[#0F172A] transition-colors duration-200 hover:text-[#1D4ED8] dark:text-[#F8FAFC] dark:hover:text-[#93C5FD]"
               >
                 {item.label}
               </Link>
@@ -48,7 +48,7 @@ export function LandingNavbar() {
             <ThemeToggle />
             <Link
               href="/auth/login"
-              className="inline-flex h-11 items-center justify-center gap-3 rounded-[14px] border border-[#173B6B] bg-[#0F2D57] px-5 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(15,45,87,0.18)] transition duration-200 hover:bg-[#13386b] dark:border-white dark:bg-white dark:text-black dark:hover:bg-slate-100"
+              className="inline-flex h-11 items-center justify-center gap-3 rounded-[14px] border border-[#1D4ED8] bg-[#1D4ED8] px-5 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(29,78,216,0.18)] transition duration-200 hover:bg-[#1E40AF] dark:border-white dark:bg-white dark:text-black dark:hover:bg-slate-100"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
                 <path
@@ -68,7 +68,7 @@ export function LandingNavbar() {
             type="button"
             onClick={() => setIsOpen(true)}
             aria-label="Open navigation menu"
-            className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0F172A] transition duration-200 hover:text-[#0F766E] dark:border-[#1E293B] dark:bg-[#0F172A] dark:text-[#F8FAFC] dark:hover:text-[#5EEAD4] lg:hidden"
+            className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0F172A] transition duration-200 hover:text-[#1D4ED8] dark:border-[#1E293B] dark:bg-[#0F172A] dark:text-[#F8FAFC] dark:hover:text-[#93C5FD] lg:hidden"
           >
             <svg viewBox="0 0 20 20" aria-hidden="true" className="h-5 w-5">
               <path

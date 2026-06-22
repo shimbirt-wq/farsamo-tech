@@ -7,13 +7,11 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#0f172a"
+          dark: "#0F172A",
+          "dark-hover": "#1E293B",
+          blue: "#1D4ED8",
+          "blue-hover": "#1E40AF",
+          "blue-light": "#93C5FD",
         }
       }
     }
