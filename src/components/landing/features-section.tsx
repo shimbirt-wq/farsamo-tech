@@ -118,7 +118,7 @@ export function LandingFeaturesSection() {
   } as const;
 
   return (
-    <section className="bg-white transition-colors duration-300 dark:bg-[#020617]">
+    <section id="services" className="scroll-mt-[100px] bg-white transition-colors duration-300 dark:bg-[#020617]">
       <div className="mx-auto w-full max-w-[1440px] px-4 pb-12 pt-14 sm:px-8">
         <div className="mx-auto max-w-[920px] text-center">
           <h2 className="text-[32px] font-extrabold leading-[1.15] tracking-[-0.03em] text-[#0F172A] sm:text-[40px] dark:text-[#F8FAFC]">

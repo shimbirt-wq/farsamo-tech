@@ -159,7 +159,10 @@ function SupportIcon() {
 
 export function LandingHero() {
   return (
-    <section className="overflow-hidden bg-white px-4 pb-8 pt-26 transition-colors duration-300 sm:px-6 sm:pt-0 lg:px-8 lg:pt-28 dark:bg-[#020617]">
+    <section
+      id="home"
+      className="scroll-mt-[100px] overflow-hidden bg-white px-4 pb-8 pt-26 transition-colors duration-300 sm:px-6 sm:pt-0 lg:px-8 lg:pt-28 dark:bg-[#020617]"
+    >
       <div className="mx-auto min-h-[720px] max-w-[1400px]">
         <div className="mx-auto flex max-w-[760px] flex-col items-center text-center">
           <span className="inline-flex h-11 items-center gap-2 rounded-full border border-teal-100 bg-[#F0FDFA] px-5 text-sm font-semibold text-[#0F766E] shadow-[0_10px_30px_rgba(20,184,166,0.08)] dark:border-teal-900/60 dark:bg-teal-950/40 dark:text-[#5EEAD4]">
@@ -178,7 +181,7 @@ export function LandingHero() {
             Report issues, get expert help, and track progress all in one place.
           </p>
 
-          <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row">
+          <div id="requests" className="scroll-mt-[100px] mt-9 flex flex-col items-center gap-4 sm:flex-row">
             <Link
               href="/repair-tickets/create"
               className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-[#0F766E] px-7 text-[16px] font-semibold text-white shadow-[0_18px_45px_rgba(15,118,110,0.24)] transition duration-200 hover:bg-[#115E59]"
@@ -196,7 +199,10 @@ export function LandingHero() {
           </div>
         </div>
 
-        <div className="mx-auto mb-7 mt-[96px] flex max-w-[760px] flex-col items-center text-center">
+        <div
+          id="about-us"
+          className="mx-auto mb-7 mt-[96px] flex max-w-[760px] scroll-mt-[100px] flex-col items-center text-center"
+        >
           <h2 className="text-[28px] font-extrabold leading-[1.25] text-[#0F172A] dark:text-[#F8FAFC]">
             Meet the <span className="text-[#0F766E]">dedicated team</span> behind your smooth IT support
             experience.

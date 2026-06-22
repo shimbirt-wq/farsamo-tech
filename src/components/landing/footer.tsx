@@ -64,7 +64,10 @@ function LocationIcon() {
 
 export function LandingFooter() {
   return (
-    <footer className="relative overflow-hidden bg-[#071B3A] px-4 pb-8 pt-16 text-white sm:px-6 lg:px-8">
+    <footer
+      id="support"
+      className="relative scroll-mt-[100px] overflow-hidden bg-[#071B3A] px-4 pb-8 pt-16 text-white sm:px-6 lg:px-8"
+    >
       <div className="pointer-events-none absolute right-0 top-0 h-full w-[260px] bg-[radial-gradient(circle,_rgba(20,184,166,0.18)_1px,_transparent_1px)] bg-[length:10px_10px] opacity-40" />
       <div className="mx-auto max-w-[1400px]">
         <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">

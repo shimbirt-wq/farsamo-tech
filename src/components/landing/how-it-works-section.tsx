@@ -121,7 +121,7 @@ export function LandingHowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="px-4 pb-20 pt-12 transition-colors duration-300 sm:px-6 lg:px-8"
+      className="scroll-mt-[100px] px-4 pb-20 pt-12 transition-colors duration-300 sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-[1400px]">
         <div className="text-center">

@@ -8,12 +8,9 @@ import { MobileMenu } from "@/components/landing/mobile-menu";
 import { ThemeToggle } from "@/components/landing/theme-toggle";
 
 const navigationItems = [
-  { href: "/", label: "Home" },
-  { href: "/devices", label: "Services" },
-  { href: "/repair-tickets", label: "My Requests" },
-  { href: "/#how-it-works", label: "How It Works" },
-  { href: "/#about-us", label: "About Us" },
-  { href: "/#support", label: "Support" }
+  { href: "/#home", label: "Home" },
+  { href: "/#services", label: "Services" },
+  { href: "/#about-us", label: "About Us" }
 ] as const;
 
 export function LandingNavbar() {
