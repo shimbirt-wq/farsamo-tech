@@ -41,8 +41,9 @@ export function Logo({ compact = false }: LogoProps) {
         </svg>
       </span>
       <span className={`${compact ? "hidden sm:flex" : "flex"} flex-col leading-none`}>
-        <span className="text-[23px] font-extrabold tracking-[-0.04em] text-[#00796B]">
-          Farsamotech
+        <span className="text-[23px] font-extrabold tracking-[-0.04em]">
+          <span className="text-[#0F172A] dark:text-white">Farsamo</span>
+          <span className="text-[#00796B] dark:text-[#14B8A6]">Tech</span>
         </span>
         <span className="mt-1 text-[11px] font-medium tracking-[0.01em] text-[#00796B]/85">
           Smart Solving. Better Future.
