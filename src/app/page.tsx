@@ -1,15 +1,17 @@
-import { LandingFeaturesSection } from "@/components/landing/features-section";
+import { LandingFooter } from "@/components/landing/footer";
+import { LandingHowItWorksSection } from "@/components/landing/how-it-works-section";
 import { LandingHero } from "@/components/landing/hero";
 import { LandingNavbar } from "@/components/landing/navbar";
-import { LandingStatisticsSection } from "@/components/landing/statistics-section";
+import { LandingStatsStripSection } from "@/components/landing/stats-strip-section";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,_#ffffff_0%,_#f7fbfa_55%,_#f4f8ff_100%)] transition-colors duration-300 dark:bg-[#020617]">
+    <main className="min-h-screen bg-white transition-colors duration-300 dark:bg-[#020617]">
       <LandingNavbar />
       <LandingHero />
-      <LandingFeaturesSection />
-      <LandingStatisticsSection />
+      <LandingHowItWorksSection />
+      <LandingStatsStripSection />
+      <LandingFooter />
     </main>
   );
 }
