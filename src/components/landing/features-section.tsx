@@ -119,7 +119,7 @@ export function LandingFeaturesSection() {
 
   return (
     <section className="bg-white">
-      <div className="mx-auto w-full max-w-[1440px] px-4 pb-24 pt-24 sm:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-4 pb-12 pt-14 sm:px-8">
         <div className="mx-auto max-w-[920px] text-center">
           <h2 className="text-[32px] font-extrabold leading-[1.15] tracking-[-0.03em] text-[#0F172A] sm:text-[40px]">
             Everything you need to manage repairs efficiently
@@ -129,7 +129,7 @@ export function LandingFeaturesSection() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-9 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
           {featureCards.map((card, index) => {
             const Icon = card.icon;
 

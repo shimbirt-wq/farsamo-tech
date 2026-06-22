@@ -1,6 +1,7 @@
 import { LandingFeaturesSection } from "@/components/landing/features-section";
 import { LandingHero } from "@/components/landing/hero";
 import { LandingNavbar } from "@/components/landing/navbar";
+import { LandingStatisticsSection } from "@/components/landing/statistics-section";
 
 export default function HomePage() {
   return (
@@ -8,6 +9,7 @@ export default function HomePage() {
       <LandingNavbar />
       <LandingHero />
       <LandingFeaturesSection />
+      <LandingStatisticsSection />
     </main>
   );
 }
